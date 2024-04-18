@@ -11,6 +11,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <vector>
+#include <memory>
 
 namespace SystemUtils {
 
@@ -182,7 +183,7 @@ namespace SystemUtils {
         *   
         */
        virtual std::shared_ptr< IFile > Clone() = 0;
-    }
+    };
 }
 
 #endif /*SYSTEM_UTILS_I_FILE_HPP*/
