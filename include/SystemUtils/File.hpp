@@ -120,7 +120,7 @@ namespace SystemUtils {
 
         /**
          * This method returns the directory containing the user's
-         * saved application files.
+         * saved App files.
          * 
          * @param[in] nameKey
          *      This is a short string identifying the application, to use for
@@ -130,6 +130,19 @@ namespace SystemUtils {
          *      Returns the directory containing the user' saved application file.
         */
         static std::string GetUserSavedApplicationDirectory(const std::string& nameKey);
+
+        /**
+         * This method returns the directory containing the user's
+         * saved Game files.
+         * 
+         * @param[in] nameKey
+         *      This is a short string identifying the Game, to use for
+         *      purposes such as naming the directory containg the user's
+         *      saved Game.
+         * @return
+         *      Returns the directory containing the user' saved Game file.
+        */
+        static std::string GetUserSavedGameDirectory(const std::string& nameKey);
 
         /**
          * This method lists the contents of a directory.
