@@ -23,7 +23,7 @@ namespace SystemUtils {
          * This contains any platform-specific private properties
          * of the class.
         */
-       std::unique_ptr< Platform > platform;
+       std::unique_ptr< Platform > platform_;
 
        ~Impl() noexcept;
        Impl(const Impl&) = delete;
