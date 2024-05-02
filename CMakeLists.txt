@@ -8,14 +8,40 @@ set(this SystemUtils)
 
 set(Headers 
     include/SystemUtils/IFile.hpp
+    include/SystemUtils/IFileSystemEntry.hpp
+    include/SystemUtils/File.hpp
+    include/SystemUtils/StringFile.hpp
+    include/SystemUtils/Time.hpp
+    
 )
 
-#set(Sources )
+set(Sources 
+    src/File.cpp
+    src/FileImpl.hpp
+    src/StringFile.cpp   
+)
+
+if(MSVC)
+    list(APPEND Sources 
+        src/Win32/FileWin32.cpp 
+        src/Win32/TimeWin32.cpp  
+    )
+    set(TargetFolders Win32) 
+    add_definitions(
+        -DUNICODE -D_UNICODE
+        -D_CRT_SOURCE_NO_WARNINGS
+    )
+endif()
+
 
 add_library(${this} STATIC ${Sources} ${Headers})
 set_target_properties(${this} PROPERTIES 
     FOLDER Libraries
 )
+target_link_libraries(${this} PUBLIC
+    StringUtils
+)
+
 
 target_include_directories(${this} PUBLIC include)
 
