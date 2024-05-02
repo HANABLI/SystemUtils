@@ -9,9 +9,9 @@
  * © 2024 by Hatem Nabli
 */
 
-#include "IFile.hpp"
+#include <SystemUtils/IFile.hpp>
 
-#include <stdin.h>
+#include <stdint.h>
 #include <string>
 #include <vector>
 #include <memory>

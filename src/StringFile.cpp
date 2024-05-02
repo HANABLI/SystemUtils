@@ -42,7 +42,7 @@ namespace SystemUtils {
     StringFile::StringFile(StringFile&&) noexcept = default;
     StringFile& StringFile::operator=(const StringFile& other) {
         if (&other != this) {
-            *impl = *other.impl_;
+            *impl_ = *other.impl_;
         }
         return *this;
     }
@@ -90,6 +90,16 @@ namespace SystemUtils {
         impl_->position = (size_t)position;
     }
 
+    size_t StringFile::Peek(Buffer& buffer, size_t numBytes, size_t offset) const {
+        if (numBytes == 0) {
+            numBytes = buffer.size();
+        }
+        if (numBytes == 0) {
+            return 0;
+        }
+        return Peek(&buffer[offset], numBytes);
+    }
+
     size_t StringFile::Peek(void* buffer, size_t numBytes) const {
         const size_t amountCopied = std::min(numBytes, impl_->value.size() - std::min(impl_->value.size(), impl_->position));
         for (size_t i = 0; i < amountCopied; ++i) {
@@ -108,8 +118,8 @@ namespace SystemUtils {
         return Read(&buffer[offset], numBytes);
     }
 
-    size_t StringFile::Read(Buffer& buffer, size_t numBytes) {
-        const size_t amountCopied = std::min(numBytes, impl_->value.size() - std::min(impl_->value.size(), impl_->position));
+    size_t StringFile::Read(void* buffer, size_t numBytes) {
+        const size_t amountCopied = std::min(numBytes, (impl_->value.size() - std::min(impl_->value.size(), impl_->position)));
         for (size_t i = 0; i < amountCopied; ++i) {
             ((uint8_t*)buffer)[i] = impl_->value[impl_->position + i];
         }

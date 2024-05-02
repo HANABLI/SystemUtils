@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.8)
 set(this SystemUtilsTests)
 
 set(Sources 
-    
+    src/StringFileTests.cpp
 )
 
 add_executable(${this} ${Sources})

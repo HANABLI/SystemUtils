@@ -10,6 +10,7 @@
 #include <memory>
 #include <SystemUtils\File.hpp>
 
+
 namespace SystemUtils {
 
     struct File::Impl {

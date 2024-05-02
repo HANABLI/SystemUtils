@@ -23,7 +23,7 @@ namespace SystemUtils {
     
 
     public:
-        typedef sts::vector< uint8_t > Buffer;
+        typedef std::vector< uint8_t > Buffer;
         
         //Methods
     public:

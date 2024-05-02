@@ -16,9 +16,8 @@
 #include <Windows.h>
 #undef CreateDirectory
 
-#include <StringUtils/StringUtils.hpp>
-#include <SystemUtils/File.hpp>
-#include <../FileImpl.hpp>
+
+#include "../FileImpl.hpp"
 
 #include <io.h>
 #include <KnownFolders.h>
@@ -28,6 +27,8 @@
 #include <Shlwapi.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <StringUtils/StringUtils.hpp>
+#include <SystemUtils/File.hpp>
 
 // ensure we link with Windows shell utility libraries.
 #pragma comment(lib, "Shlwapi")
@@ -65,8 +66,8 @@ namespace SystemUtils {
         bool writeAccess = false;
    };
    
-   File::Impl::~Impl() noexpect = default;
-   File::Impl::Impl(Impl&&) noexpect = default;
+   File::Impl::~Impl() noexcept = default;
+   File::Impl::Impl(Impl&&) noexcept = default;
    File::Impl& File::Impl::operator=(Impl&&) = default;
 
    File::Impl::Impl() : platform_(new Platform())
@@ -106,8 +107,8 @@ namespace SystemUtils {
         Close();
    }
 
-   File::File(File&& other) noexpect = default;
-   File& File::operator=(File&& other) noexpect= default;
+   File::File(File&& other) noexcept = default;
+   File& File::operator=(File&& other) noexcept= default;
 
    File::File(std::string path) : impl_(new Impl()) {
         impl_->path = path;
@@ -151,13 +152,13 @@ namespace SystemUtils {
    }
 
    void File::Close() {
-        (void)CloseHandle(impl_->platforme_->handle);
+        (void)CloseHandle(impl_->platform_->handle);
         impl_->platform_->handle = INVALID_HANDLE_VALUE;
    }
 
    bool File::OpenReadWrite() {
         Close();
-        bool createPathTried = flase;
+        bool createPathTried = false;
         while (impl_->platform_->handle == INVALID_HANDLE_VALUE) {
             impl_->platform_->handle = CreateFileA(
                 impl_->path.c_str(),
@@ -168,7 +169,7 @@ namespace SystemUtils {
                 FILE_ATTRIBUTE_NORMAL,
                 NULL
             );
-            if (impl_paltform_->handle == INVALID_HANDLE_VALUE) {
+            if (impl_->platform_->handle == INVALID_HANDLE_VALUE) {
                 if (
                     createPathTried
                     || !impl_->CreatePath(impl_->path)
@@ -189,13 +190,13 @@ namespace SystemUtils {
 
    bool File::Move(const std::string& newPath) {
         if (MoveFileA(impl_->path.c_str(), newPath.c_str()) == 0) {
-            return flase;
+            return false;
         }
         impl_->path = newPath;
         return true;
    }
 
-    bool file:FCopy(const std::string& destination) {
+    bool File::Copy(const std::string& destination) {
         return (CopyFileA(impl_->path.c_str(), destination.c_str(), FALSE) != FALSE);
     }
 
@@ -210,7 +211,7 @@ namespace SystemUtils {
 
     bool File::IsAbsolutePath(const std::string& path) {
         static std::regex AbsolutePath("[a-zA-Z]:[/\\\\].*");
-        return std::regex_match(path, AbsolutePathRegex);
+        return std::regex_match(path, AbsolutePath);
     }
 
     std::string File::GetExeImagePath() {
@@ -219,7 +220,7 @@ namespace SystemUtils {
         return FixPathDelimiters(&exeImagePath[0]);
     }
 
-    std::string File::GetExeParentDirectory() {
+    std::string File::GetExeParentPath() {
         std::vector< char > exeDirectory(MAX_PATH + 1);
         (void)GetModuleFileNameA(NULL, &exeDirectory[0], static_cast< DWORD >(exeDirectory.size()));
         (void)PathRemoveFileSpecA(&exeDirectory[0]);
@@ -227,7 +228,7 @@ namespace SystemUtils {
     }
 
     std::string File::GetResourceFilePath(const std::string& name) {
-        return StringUtils::sprintf("%s/%s", GetExeParentDirectory().c_str(), name.c_str());
+        return StringUtils::sprintf("%s/%s", GetExeParentPath().c_str(), name.c_str());
     }
 
     std::string File::GetUserHomeDirectory() {
@@ -265,7 +266,7 @@ namespace SystemUtils {
         if (SHGetKnownFolderPath(FOLDERID_SavedGames, 0, NULL, &pathWide) != S_OK) {
             return "";
         }
-        std::string pathNarrow(StringUtil::wcstombs(pathWide));
+        std::string pathNarrow(StringUtils::wcstombs(pathWide));
         CoTaskMemFree(pathWide);
         return StringUtils::sprintf("%s/%s", pathNarrow.c_str(), nameKey.c_str());
     }
@@ -282,11 +283,11 @@ namespace SystemUtils {
         std::string listGlob(directoryWithSeparator);
         listGlob += "*.*";
         WIN32_FIND_DATAA findFileData;
-        const HANDLE searchHandle = FindFirstFileA(listGlob.c_str(), &findfileData);
+        const HANDLE searchHandle = FindFirstFileA(listGlob.c_str(), &findFileData);
         list.clear();
         if (searchHandle != INVALID_HANDLE_VALUE) {
             do {
-                std::string name(findFileData.cfileName);
+                std::string name(findFileData.cFileName);
                 if (
                     (name == ".")
                     || (name == "..")
@@ -296,7 +297,7 @@ namespace SystemUtils {
                 std::string filePath(directoryWithSeparator);
                 filePath += name;
                 list.push_back(FixPathDelimiters(filePath));
-            } while (FindNextFileA(searchHandle, &findFileDate) == TRUE);
+            } while (FindNextFileA(searchHandle, &findFileData) == TRUE);
             FindClose(searchHandle);
         }
     }
@@ -308,13 +309,13 @@ namespace SystemUtils {
             && (directoryWithSeparator[directoryWithSeparator.length() - 1] != '\\')
             && (directoryWithSeparator[directoryWithSeparator.length() - 1] != '/')
         ) {
-            directoryWithSeparator += '\\'
+            directoryWithSeparator += '\\';
         }
         std::string listGlob(directoryWithSeparator);
-        listGlob += "*.*"
+        listGlob += "*.*";
         WIN32_FIND_DATAA findFileData;
-        const HANDLE searchHandle = FindFisrtFileA(listGlob.c_str(), &findFileData);
-        if (searchHandle != INVALID_HNADLE_VALUE) {
+        const HANDLE searchHandle = FindFirstFileA(listGlob.c_str(), &findFileData);
+        if (searchHandle != INVALID_HANDLE_VALUE) {
             do {
                 std::string name(findFileData.cFileName);
                 if (
@@ -331,10 +332,10 @@ namespace SystemUtils {
                     }
                 } else {
                     if (DeleteFileA(filePath.c_str()) == 0) {
-                        return flase;
+                        return false;
                     }
                 }
-            } while (FildNextFileA(searchHandle, &findFileData) == TRUE);
+            } while (FindNextFileA(searchHandle, &findFileData) == TRUE);
             FindClose(searchHandle);
         }
         return (RemoveDirectoryA(directory.c_str()) != 0);
@@ -389,7 +390,7 @@ namespace SystemUtils {
                         return false; 
                     }
                 }
-            } while (FindNextFileA(searchHandle, &findDileData) == TRUE);
+            } while (FindNextFileA(searchHandle, &findFileData) == TRUE);
             FindClose(searchHandle);
         }
         return true;
@@ -397,8 +398,8 @@ namespace SystemUtils {
 
     std::vector<std::string> File::GetDirectoryRoots() {
         const auto driveStringsBufferSize = (size_t)GetLogicalDriveStringsA(0, nullptr);
-        std::shared_ptr<char> driveStringBuffer(
-            new char[dreiveStringsBufferSize],
+        std::shared_ptr<char> driveStringsBuffer(
+            new char[driveStringsBufferSize],
             [](char* p){ delete[] p; }
         );
         if (GetLogicalDriveStringsA((DWORD)driveStringsBufferSize, driveStringsBuffer.get()) > 0) {
@@ -406,7 +407,7 @@ namespace SystemUtils {
             size_t i = 0;
             for (;;) {
                 size_t j = i;
-                while (driveStringBuffer.get()[j] != 0) {
+                while (driveStringsBuffer.get()[j] != 0) {
                     ++j;
                 }
                 if (i == j) {
@@ -415,10 +416,10 @@ namespace SystemUtils {
                 size_t k = j;
                 while (
                     (k > i)
-                    && {
+                    && (
                         (driveStringsBuffer.get()[k - 1] == '/')
                         || (driveStringsBuffer.get()[k - 1] == '\\')
-                    }
+                    )
                 ) {
                     --k;
                 }
@@ -465,7 +466,7 @@ namespace SystemUtils {
         LARGE_INTEGER distanceToMove;
         distanceToMove.QuadPart = 0;
         LARGE_INTEGER newPosition;
-        if (SetFilePointerEx(impl_->platform->handle, distanceToMove, &newPosition, FILE_CURRENT) == 0) {
+        if (SetFilePointerEx(impl_->platform_->handle, distanceToMove, &newPosition, FILE_CURRENT) == 0) {
             return 0;
         }
         return (uint64_t)newPosition.QuadPart;
@@ -496,7 +497,7 @@ namespace SystemUtils {
             return 0;
         }
         DWORD amountRead;
-        if (ReadFile(impl_->platform_->handle, buffer, (DWORD)numBytes, &amountWritten, NULL) == 0) {
+        if (ReadFile(impl_->platform_->handle, buffer, (DWORD)numBytes, &amountRead, NULL) == 0) {
             return 0;
         }
         return (size_t)amountRead;
@@ -515,7 +516,7 @@ namespace SystemUtils {
         clone->impl_->platform_->writeAccess = impl_->platform_->writeAccess;
         if (impl_->platform_->handle != INVALID_HANDLE_VALUE) {
             if (clone->impl_->platform_->writeAccess) {
-                clone->ompl_->platform_->handle = CreateFileA(
+                clone->impl_->platform_->handle = CreateFileA(
                     clone->impl_->path.c_str(),
                     GENERIC_READ | GENERIC_WRITE,
                     FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE,
@@ -525,8 +526,8 @@ namespace SystemUtils {
                     NULL
                 );
             } else {
-                clone->impl_platform_->handle = CreateFileA(
-                    clone->impl_->paath.c_str(),
+                clone->impl_->platform_->handle = CreateFileA(
+                    clone->impl_->path.c_str(),
                     GENERIC_READ,
                     FILE_SHARE_READ,
                     NULL,
@@ -537,9 +538,9 @@ namespace SystemUtils {
             }
             if (clone->impl_->platform_->handle == INVALID_HANDLE_VALUE) {
                 return nullptr;
-            }
-            return clone;
+            }            
         }
+        return clone;
     }
 
 }

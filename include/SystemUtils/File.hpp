@@ -1,7 +1,12 @@
 #ifndef SYSTEM_UTILS_FILE_HPP
 #define SYSTEM_UTILS_FILE_HPP
 
-#include <IFileSystemEntry.hpp>
+#include "IFile.hpp"
+#include "IFileSystemEntry.hpp"
+
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace SystemUtils {
 
@@ -220,7 +225,7 @@ namespace SystemUtils {
          *      This is the directory to set as the current working
          *      directory for the process.
         */
-        static void setWorkingDirectory(const std::string& workingDirectory);
+        static void SetWorkingDirectory(const std::string& workingDirectory);
     
         //Private properties
     private:

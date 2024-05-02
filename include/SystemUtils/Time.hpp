@@ -81,7 +81,7 @@ namespace SystemUtils {
          *      the "local time zone", is returned, using the C standard
          *      library "struct tm" format. 
          */
-        static struct tm localtime(time_t time = 0);
+        static struct tm localTime(time_t time = 0);
 
         // Private properties
     private:
@@ -99,3 +99,5 @@ namespace SystemUtils {
        
    };
 }
+
+#endif /*SYSTEM_UTILS_TIME_HPP*/

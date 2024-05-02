@@ -16,12 +16,12 @@ namespace SystemUtils {
      * This is the Win32-specific state of the Time calss.
     */
    struct Time::Impl {
-        double scale = 0.0
+        double scale = 0.0;
    };
 
    Time::~Time() = default;
    Time::Time(Time&&) noexcept = default;
-   Time& Time::operator=(Time&&) noexpect = default;
+   Time& Time::operator=(Time&&) noexcept = default;
 
    Time::Time(): impl_(new Impl()) {
 
