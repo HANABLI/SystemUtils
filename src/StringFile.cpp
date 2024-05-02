@@ -32,7 +32,11 @@ namespace SystemUtils {
     {
         impl_->value.assign(initialValue.begin(), initialValue.end());
     }
-
+    StringFile::StringFile(std::vector< uint8_t > initialValue)
+        : impl_(new Impl())
+    {
+        impl_->value.assign(initialValue.begin(), initialValue.end());
+    }
     StringFile::~StringFile() noexcept = default;
     StringFile::StringFile(const StringFile& other)
         : impl_(new Impl()) 
