@@ -116,7 +116,56 @@ TEST(StringFileTests, StringFileTests_Clone_Test) {
     );
 }
 
+TEST(StringFileTests, StringFileTests_AssignFromString_Test) {
+    const std::string helloWorldTest = "Hello, World!\r\n";
+    SystemUtils::StringFile sf;
+    SystemUtils::IFile::Buffer buffer(helloWorldTest.length());
+    sf = helloWorldTest;
+    ASSERT_EQ(helloWorldTest.length(), sf.Read(buffer));
+    ASSERT_EQ(helloWorldTest, std::string(buffer.begin(), buffer.end()));
+}
 
+TEST(StringFileTests, StringFileTests_AssignFromVector_Test) {
+    const std::vector< uint8_t > helloWorldTest{'H','e','l','l','o',',',' ','W','o','r','l','d','!','\r','\n'};
+    SystemUtils::StringFile sf;
+    SystemUtils::IFile::Buffer buffer(helloWorldTest.size());
+    sf = helloWorldTest;
+    ASSERT_EQ(helloWorldTest.size(), sf.Read(buffer));
+    ASSERT_EQ(helloWorldTest, buffer);
+}
+
+TEST(StringFileTests, StringFileTests_TypeCastToString_Test) {
+    const std::string helloWorldTest = "Hello, World!\r\n";
+    SystemUtils::StringFile sf(helloWorldTest);
+    ASSERT_EQ(helloWorldTest, (std::string)sf);
+}
+
+TEST(StringFileTests,  StringFileTests_TypeCastToVector_Test) {
+    std::vector< uint8_t > helloWorldTest{'H','e','l','l','o',',',' ','W','o','r','l','d','!','\r','\n'};
+    SystemUtils::StringFile sf(helloWorldTest);
+    ASSERT_EQ(helloWorldTest, (std::vector< uint8_t >)sf);
+}
+
+TEST(StringFileTests, StringFileTests_Remove_Test) {
+    const std::string helloWorldTest = "Hello, World!\r\n";
+    SystemUtils::StringFile sf(helloWorldTest);
+    sf.SetPosition(5);
+    sf.Remove(0);
+    ASSERT_EQ(helloWorldTest.length(), sf.GetSize());
+    ASSERT_EQ(5, sf.GetPosition());
+    sf.Remove(2);
+    ASSERT_EQ(helloWorldTest.length() - 2, sf.GetSize());
+    ASSERT_EQ(3, sf.GetPosition());
+    ASSERT_EQ("llo, World!\r\n", (std::string)sf);
+    sf.Remove(5);
+    ASSERT_EQ(helloWorldTest.length() - 7, sf.GetSize());
+    ASSERT_EQ(0, sf.GetPosition());
+    ASSERT_EQ("World!\r\n", (std::string)sf);
+    sf.Remove(10);
+    ASSERT_EQ(0, sf.GetSize());
+    ASSERT_EQ(0, sf.GetPosition());
+    ASSERT_EQ("", (std::string)sf);
+}
 
 
 
