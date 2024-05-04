@@ -7,6 +7,7 @@ set(this SystemUtilsTests)
 
 set(Sources 
     src/StringFileTests.cpp
+    src/DirectoryMonitorTests.cpp
 )
 
 add_executable(${this} ${Sources})
@@ -14,11 +15,12 @@ set_target_properties(${this} PROPERTIES
     FOLDER Tests
 )
 
-target_include_directories(${this} PRIVATE ..)
+target_include_directories(${this} PRIVATE ../src)
 
 target_link_libraries(${this} PUBLIC 
     gtest_main 
     SystemUtils
+    StringUtils
 )
 
 add_test(

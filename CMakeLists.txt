@@ -12,6 +12,7 @@ set(Headers
     include/SystemUtils/File.hpp
     include/SystemUtils/StringFile.hpp
     include/SystemUtils/Time.hpp
+    include/SystemUtils/DirectoryMonitor.hpp
     
 )
 
@@ -23,6 +24,7 @@ set(Sources
 
 if(MSVC)
     list(APPEND Sources 
+        src/Win32/DirectoryMonitorWin32.cpp
         src/Win32/FileWin32.cpp 
         src/Win32/TimeWin32.cpp  
     )
