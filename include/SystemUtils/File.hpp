@@ -90,7 +90,7 @@ namespace SystemUtils {
         *     The directory containing the application's executable image
         *     is returned.
         */
-        static std::string GetExeParentPath();
+        static std::string GetExeParentDirectory();
 
         /**
          * This method returns the path to the application resource file

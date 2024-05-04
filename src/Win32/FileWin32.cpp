@@ -220,7 +220,7 @@ namespace SystemUtils {
         return FixPathDelimiters(&exeImagePath[0]);
     }
 
-    std::string File::GetExeParentPath() {
+    std::string File::GetExeParentDirectory() {
         std::vector< char > exeDirectory(MAX_PATH + 1);
         (void)GetModuleFileNameA(NULL, &exeDirectory[0], static_cast< DWORD >(exeDirectory.size()));
         (void)PathRemoveFileSpecA(&exeDirectory[0]);
@@ -228,7 +228,7 @@ namespace SystemUtils {
     }
 
     std::string File::GetResourceFilePath(const std::string& name) {
-        return StringUtils::sprintf("%s/%s", GetExeParentPath().c_str(), name.c_str());
+        return StringUtils::sprintf("%s/%s", GetExeParentDirectory().c_str(), name.c_str());
     }
 
     std::string File::GetUserHomeDirectory() {
