@@ -171,4 +171,144 @@ TEST_F(DirectoryMonitorTests, DirectoryMonitoring_Test) {
 }
 
 
+TEST_F(DirectoryMonitorTests, MoveDirectoryMonitor_Test) {
+
+    //Start monitoring here
+    ASSERT_TRUE(dm.Start(dmCallbackMonitoring.dmCallback, innerPath));
+
+    //Move the monitor
+    SystemUtils::DirectoryMonitor newDm(std::move(dm));
+    dm.Stop();
+    dm = std::move(newDm);
+    newDm.Stop();
+
+    //Create a file in the monitored directory.
+    std::string testFilePath = innerPath + "/fred.txt";
+    {
+        std::fstream file(testFilePath, std::ios_base::out | std::ios_base::ate);
+        ASSERT_FALSE(file.fail());
+        file.close();
+        ASSERT_TRUE(dmCallbackMonitoring.AwaitChanged());
+    }
+
+
+    //Edit the file in the monitored directory.
+    {
+        std::fstream file(testFilePath, std::ios_base::out | std::ios_base::ate);
+        ASSERT_FALSE(file.fail());
+        file << "Hello, World!\r\n";
+        ASSERT_FALSE(file.fail());
+        file.close();
+        ASSERT_TRUE(dmCallbackMonitoring.AwaitChanged());
+    }
+
+    //Delete the File in the monitored directory.
+    {
+        SystemUtils::File file(testFilePath);
+        file.Destroy();
+        ASSERT_TRUE(dmCallbackMonitoring.AwaitChanged());
+    }
+
+    //Create a file outside the monitored directory
+    testFilePath = outerpath + "/myFile.txt";
+    {
+        std::fstream file(testFilePath, std::ios_base::out | std::ios_base::ate);
+        ASSERT_FALSE(file.fail());
+        file.close();
+        ASSERT_FALSE(dmCallbackMonitoring.AwaitChanged());
+    }
+
+    //Edit the file outside the monitored directory.
+    {
+        std::fstream file(testFilePath, std::ios_base::out | std::ios_base::ate);
+        ASSERT_FALSE(file.fail());
+        file << "Hello, World\r\n";
+        ASSERT_FALSE(file.fail());
+        file.close();
+        ASSERT_FALSE(dmCallbackMonitoring.AwaitChanged());
+    }
+
+    //Delete file outside the monitored directory.
+    {
+        SystemUtils::File file(testFilePath);
+        file.Destroy();
+        ASSERT_FALSE(dmCallbackMonitoring.AwaitChanged());
+    }
+}
+
+TEST_F(DirectoryMonitorTests, Stop_Test) {
+    ASSERT_TRUE(dm.Start(dmCallbackMonitoring.dmCallback, innerPath));
+
+    //Create a file in the monitored area.
+    std::string helloWorldFilePath = innerPath + "/testFile.txt";
+    {
+        std::fstream file(helloWorldFilePath, std::ios_base::out | std::ios_base::ate);
+        ASSERT_FALSE(file.fail());
+        file.close();
+        ASSERT_TRUE(dmCallbackMonitoring.AwaitChanged());
+    }
+
+    dm.Stop();
+
+    //Edit the file in the monitored directory
+    {
+        std::fstream file(helloWorldFilePath, std::ios_base::out | std::ios_base::ate);
+        ASSERT_FALSE(file.fail());
+        file << "Hello, World!\r\n";
+        ASSERT_FALSE(file.fail());
+        file.close();
+        ASSERT_FALSE(dmCallbackMonitoring.AwaitChanged());
+    }
+
+    //Delete the file in the monitored directory
+    {
+        SystemUtils::File file(helloWorldFilePath);
+        file.Destroy();
+        ASSERT_FALSE(dmCallbackMonitoring.AwaitChanged());
+    }
+}
+
+TEST_F(DirectoryMonitorTests, ModifieExistingFileBeforeMonitoring_Test) {
+
+    std::string helloTestFile = innerPath + "/file.txt";
+    {
+        std::fstream file(helloTestFile, std::ios_base::out | std::ios_base::ate);
+        ASSERT_FALSE(file.fail());
+        file.close();
+        ASSERT_FALSE(dmCallbackMonitoring.AwaitChanged());
+    }
+
+    //Edit the file in the directory before monitoring
+    {
+        std::fstream file(helloTestFile, std::ios_base::out | std::ios_base::ate);
+        ASSERT_FALSE(file.fail());
+        file << "Hello, World!\r\n";
+        ASSERT_FALSE(file.fail());
+        file.close();
+        ASSERT_FALSE(dmCallbackMonitoring.AwaitChanged());
+    }
+
+    // Start monitoring
+    ASSERT_TRUE(dm.Start(dmCallbackMonitoring.dmCallback, innerPath));
+
+    //Edit the file in the directory when monitoring started
+    {
+        std::fstream file(helloTestFile, std::ios_base::out | std::ios_base::ate);
+        ASSERT_FALSE(file.fail());
+        file.clear();
+        ASSERT_FALSE(file.fail());
+        file.close();
+        ASSERT_TRUE(dmCallbackMonitoring.AwaitChanged());
+    }
+
+    //Destroy the file in the monitored directory
+    {
+        SystemUtils::File file(helloTestFile);
+        file.Destroy();
+        ASSERT_TRUE(dmCallbackMonitoring.AwaitChanged());
+
+    }
+}
+
+
 
