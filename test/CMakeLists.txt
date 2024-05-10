@@ -7,6 +7,7 @@ set(this SystemUtilsTests)
 
 set(Sources 
     src/StringFileTests.cpp
+    src/FileTests.cpp
     src/DirectoryMonitorTests.cpp
 )
 
