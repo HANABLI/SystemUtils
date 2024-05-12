@@ -9,6 +9,7 @@ set(Sources
     src/StringFileTests.cpp
     src/FileTests.cpp
     src/DirectoryMonitorTests.cpp
+    src/DiagnosticsSenderTests.cpp
 )
 
 add_executable(${this} ${Sources})
