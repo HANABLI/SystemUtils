@@ -13,13 +13,15 @@ set(Headers
     include/SystemUtils/StringFile.hpp
     include/SystemUtils/Time.hpp
     include/SystemUtils/DirectoryMonitor.hpp
+    include/SystemUtils/DiagnosticsSender.hpp
     
 )
 
 set(Sources 
     src/File.cpp
     src/FileImpl.hpp
-    src/StringFile.cpp   
+    src/StringFile.cpp
+    src/DiagnosticsSender.cpp   
 )
 
 if(MSVC)
