@@ -148,7 +148,7 @@ TEST_F(DiagnosticsStreamReporterTests, SaveDiagnosticMessagesToLogFiles) {
     sender.SendDiagnosticInformationString(0, "really the last message");
     (void)fclose(output);
     (void)fclose(error);
-    output = fopen((testAreaPath + "/error.txt").c_str(), "rt");
+    output = fopen((testAreaPath + "/out.txt").c_str(), "rt");
     CheckLogMessage(output, "foo:0] hello\n");
     CheckLogMessage(output, "foo:2] last message\n");
     CheckIsEndOfFile(output);
