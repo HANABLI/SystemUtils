@@ -14,6 +14,8 @@ set(Headers
     include/SystemUtils/Time.hpp
     include/SystemUtils/DirectoryMonitor.hpp
     include/SystemUtils/DiagnosticsSender.hpp
+    include/SystemUtils/DiagnosticsContext.hpp
+    include/SystemUtils/DiagnosticsStreamReporter.hpp
     
 )
 
@@ -22,6 +24,8 @@ set(Sources
     src/FileImpl.hpp
     src/StringFile.cpp
     src/DiagnosticsSender.cpp   
+    src/DiagnosticsContext.cpp
+    src/DiagnosticsStreamReporter.cpp
 )
 
 if(MSVC)
