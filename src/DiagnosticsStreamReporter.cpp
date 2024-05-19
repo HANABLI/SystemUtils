@@ -44,7 +44,7 @@ namespace SystemUtils {
             }
             fprintf(
                 destination,
-                "[%.6lf %s::%zu] %s%s\n",
+                "[%.6lf %s:%zu] %s%s\n",
                 time->GetTime() - timeReference,
                 senderName.c_str(),
                 level,
