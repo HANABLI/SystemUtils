@@ -16,6 +16,9 @@ set(Headers
     include/SystemUtils/DiagnosticsSender.hpp
     include/SystemUtils/DiagnosticsContext.hpp
     include/SystemUtils/DiagnosticsStreamReporter.hpp
+    include/SystemUtils/INetworkConnection.hpp
+    include/SystemUtils/NetworkConnection.hpp
+    include/SystemUtils/NetworkEndPoint.hpp
     
 )
 
@@ -23,13 +26,23 @@ set(Sources
     src/File.cpp
     src/FileImpl.hpp
     src/StringFile.cpp
+    src/DataQueue.hpp
+    src/DataQueue.cpp
     src/DiagnosticsSender.cpp   
     src/DiagnosticsContext.cpp
     src/DiagnosticsStreamReporter.cpp
+    src/NetworkConnectionImpl.hpp
+    src/NetworkConnection.cpp
+    src/NetworkEndPointImpl.hpp
+    src/NetworkEndPoint.cpp
 )
 
 if(MSVC)
     list(APPEND Sources 
+        src/Win32/NetworkEndPointWin32.hpp
+        src/Win32/NetworkEndPointWin32.cpp
+        src/Win32/NetworkConnectionWin32.hpp
+        src/Win32/NetworkConnectionWin32.cpp
         src/Win32/DirectoryMonitorWin32.cpp
         src/Win32/FileWin32.cpp 
         src/Win32/TimeWin32.cpp  
