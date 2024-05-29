@@ -159,7 +159,7 @@ namespace SystemUtils {
         return impl_->Dequeue(numBytes, true, false);
     }
 
-    auto DataQueue::Drop(size_t numBytes) {
+    void DataQueue::Drop(size_t numBytes) {
         impl_->Dequeue(numBytes, false, true);
     }
 

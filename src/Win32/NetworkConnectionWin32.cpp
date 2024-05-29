@@ -5,8 +5,8 @@
  * of the SystemUtils::NetworkConnectionWin32 class.
 */
 
-#include <Windows.h>
 #include <WinSock2.h>
+#include <Windows.h>
 #include <WS2tcpip.h>
 #pragma comment(lib, "ws2_32")
 #undef ERROR
@@ -235,7 +235,7 @@ namespace SystemUtils
                 const int dataSent = send(platform->socket, (const char*)&buffer[0], writeSize, 0);
                 if (dataSent == SOCKET_ERROR) {
                     const auto wsaLastError = WSAGetLastError();
-                    if (wsaLastError = WSAEWOULDBLOCK) {
+                    if (wsaLastError == WSAEWOULDBLOCK) {
                         diagnosticsSender.SendDiagnosticInformationString(
                             1,
                             "connection closed abruptly by peer"
@@ -291,7 +291,7 @@ namespace SystemUtils
         diagnosticsSender.SendDiagnosticInformationString(0, "processor returning due to being told to stop");
     }
 
-    bool NetworkConnection::Impl::IsConnected() {
+    bool NetworkConnection::Impl::IsConnected() const {
         return(platform->socket != INVALID_SOCKET);
     }
     
@@ -317,7 +317,7 @@ namespace SystemUtils
                 (void)SetEvent(platform->processorStateChangeevent);
             } else {
                 //Close immediately
-                CloseImmediately()
+                CloseImmediately();
                 return (brokenDelegate != nullptr);
             }
         }
@@ -329,7 +329,7 @@ namespace SystemUtils
         diagnosticsSender.SendDiagnosticInformationString(1, "closed connection");
     }
 
-    uint32_t NetworkConnection::GetAddressOfHost(const std::string& hostName) {
+    uint32_t NetworkConnection::Impl::GetAddressOfHost(const std::string& hostName) {
         bool wsaStarted = false;
         const std::unique_ptr< WSADATA, std::function< void(WSADATA*) > > WSAData(
             new WSADATA,
@@ -340,15 +340,15 @@ namespace SystemUtils
                 delete p;
             }
         );
-        wsaStarted = !WSAStartup(MAKEWORD(2, 0), wsaData.get());
+        wsaStarted = !WSAStartup(MAKEWORD(2, 0), WSAData.get());
         struct addrinfo hints;
         (void)memset(&hints, 0, sizeof(hints));
         hints.ai_family = AF_INET;
         struct addrinfo* rawResults;
-        if (getaddrinfo(host.c_str(), NULL, &hints, &rawResults) != 0) {
+        if (getaddrinfo(hostName.c_str(), NULL, &hints, &rawResults) != 0) {
             return 0;
         }
-        std::unique_ptr< struct addrinfo, std::function< voir(struct addrinfo*) > > results(
+        std::unique_ptr< struct addrinfo, std::function< void(struct addrinfo*) > > results(
             rawResults,
             [](struct addrinfo* p)
             {

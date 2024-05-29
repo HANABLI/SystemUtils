@@ -29,12 +29,12 @@ namespace SystemUtils {
             /**
              * This is the IPv4 address of the datagram recipient.
             */
-            uint32_t address;
+            uint32_t address = 0;
 
             /**
              * This is the port number of the datagram recipient
             */
-            uint16_t port;
+            uint16_t port = 0;
 
             /**
             * This is the message to sent in the datagram.

@@ -51,7 +51,7 @@ namespace {
 
 namespace SystemUtils {
 
-    NetworkEndPoint::Impl::Impl() : platform( new Platform()), diagnosticsSender("NetworkEndPoint");
+    NetworkEndPoint::Impl::Impl() : platform( new Platform()), diagnosticsSender("NetworkEndPoint")
     {
         WSADATA wsaData;
         if (!WSAStartup(MAKEWORD(2, 0), &wsaData)) {
@@ -66,6 +66,9 @@ namespace SystemUtils {
         }
         if (platform->processorStateChangeevent != NULL) {
             (void)CloseHandle(platform->processorStateChangeevent);
+        }
+        if (platform->wsaStarted) {
+            (void)WSACleanup();
         }
     }
 
@@ -89,7 +92,7 @@ namespace SystemUtils {
         }
 
         if (mode == NetworkEndPoint::Mode::MulticastSend) {
-            struct in_add multicastInterface;
+            struct in_addr multicastInterface;
             multicastInterface.S_un.S_addr = htonl(localAddress);
             if (setsockopt(platform->socket, IPPROTO_IP, IP_MULTICAST_IF, (const char*)&multicastInterface, sizeof(multicastInterface)) == SOCKET_ERROR) {
                 diagnosticsSender.SendDiagnosticInformationFormatted(
@@ -151,7 +154,7 @@ namespace SystemUtils {
                 }
             } else {
                 int socketAddressLength = sizeof(socketAddress);
-                if (getsockname(platform->sock, (struct  sockaddr*)&socketAddress, &socketAddressLength) == 0)
+                if (getsockname(platform->socket, (struct  sockaddr*)&socketAddress, &socketAddressLength) == 0)
                 {
                     port = ntohs(socketAddress.sin_port);
                 } else {
@@ -217,7 +220,7 @@ namespace SystemUtils {
                 WSAGetLastError()
             );
             Close(false);
-            return flase;
+            return false;
         }
 
         if (mode == NetworkEndPoint::Mode::Connection) {
@@ -249,14 +252,14 @@ namespace SystemUtils {
             if (wait) {
                 processingLock.unlock();
                 (void)WaitForMultipleObjects(2, handles, FALSE, INFINITE);
-                processingLock();
+                processingLock.lock();
             }
             wait = true;
             buffer.resize(MAXIMUM_READ_SIZE);
             struct sockaddr_in peerAddress;
             int peerAddressSize = sizeof(peerAddress);
             if (mode == NetworkEndPoint::Mode::Connection) {
-                const SOCKET client accept(platform->socket, (struct sockaddr*)&peerAddress, &peerAddressSize);
+                const SOCKET client = accept(platform->socket, (struct sockaddr*)&peerAddress, &peerAddressSize);
                 if (client == INVALID_SOCKET) {
                     const auto wsaLastError = WSAGetLastError();
                     if (wsaLastError != WSAEWOULDBLOCK) {
@@ -275,7 +278,7 @@ namespace SystemUtils {
                     uint16_t boundPort = 0;
                     struct  sockaddr_in boundAddress;
                     int boundAddressSize = sizeof(boundAddress);
-                    if (getsockname(client, (struct sockaddre*)&boundAddress, &boundAddressSize) == 0) {
+                    if (getsockname(client, (struct sockaddr*)&boundAddress, &boundAddressSize) == 0) {
                         boundIPv4Address = ntohl(boundAddress.sin_addr.S_un.S_addr);
                         boundPort = ntohs(boundAddress.sin_port);
                     }
@@ -297,7 +300,7 @@ namespace SystemUtils {
                     (char*)&buffer[0],
                     (int)buffer.size(),
                     0,
-                    (struct soc9kaddr*)&peerAddress,
+                    (struct sockaddr*)&peerAddress,
                     &peerAddressSize
                 );
                 if (dataReceived == SOCKET_ERROR) {
@@ -415,7 +418,7 @@ namespace SystemUtils {
         ULONG result = GetAdaptersAddresses(AF_INET, 0, NULL, (PIP_ADAPTER_ADDRESSES)&buffer[0], &bufferSize);
         if (result == ERROR_BUFFER_OVERFLOW) {
             buffer.resize(bufferSize);
-            result = GetAdaptersAddresses(AF_INET, 0, NULL (PIP_ADAPTER_ADDRESSES)&buffer[0], &bufferSize);
+            result = GetAdaptersAddresses(AF_INET, 0, NULL, (PIP_ADAPTER_ADDRESSES)&buffer[0], &bufferSize);
         }
         std::vector< uint32_t > addresses;
         if (result == ERROR_SUCCESS) {

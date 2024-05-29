@@ -30,7 +30,7 @@ namespace SystemUtils {
         ~NetworkConnection() noexcept;
         NetworkConnection(const NetworkConnection&) = delete;
         NetworkConnection(NetworkConnection&&) noexcept = delete;
-        NetworkConnection& operator=(conxt NetworkConnection&) = delete;
+        NetworkConnection& operator=(const NetworkConnection&) = delete;
         NetworkConnection& operator=(NetworkConnection&&) noexcept = delete;
         
         // public methods
@@ -71,6 +71,15 @@ namespace SystemUtils {
         virtual void SendMessage(const std::vector< uint8_t >& message) override;
         virtual void Close(bool clean = false) override;
 
+    public:
+        /**
+         * This is the type of structure that contains the platform-specific
+         * private properties of the instance. It is defined in the
+         * platform-specific part of the implementation and declared here to
+         * ensure that it is scoped inside the class.
+        */
+        struct Platform;
+
         // Private properties
     private:
         /**
@@ -80,13 +89,7 @@ namespace SystemUtils {
         */
         struct Impl;
 
-        /**
-         * This is the type of structure that contains the platform-specific
-         * private properties of the instance. It is defined in the
-         * platform-specific part of the implementation and declared here to
-         * ensure that it is scoped inside the class.
-        */
-        struct Platform;
+
 
 
         /**

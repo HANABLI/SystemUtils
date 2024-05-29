@@ -42,13 +42,13 @@ namespace SystemUtils {
          * This flag indicates whether or not the peer of
          * the connection has signaled a graceful close.
         */
-        bool peerClosed = flase;
+        bool peerClosed = false;
 
         /**
          * This falhg indicates whether or not the connection
          * is in the process of being gracefully closed.
         */
-        bool closing = flase;
+        bool closing = false;
 
         /**
          * This flag indicates whether or not the socket has 
@@ -74,7 +74,7 @@ namespace SystemUtils {
          * if a new message to send has been placed in the
          * output queue, or if we wnat the worker thread to stop.
         */
-        HANDLE processorStartChangeevent = NULL;
+        HANDLE processorStateChangeevent = NULL;
 
         /**
          * This flag indicates whether or not the worker thread
@@ -119,7 +119,7 @@ namespace SystemUtils {
             uint32_t boundAddress,
             uint16_t boundPort,
             uint32_t peerAddress,
-            uint16_t peerPort,
+            uint16_t peerPort
         );
 
         /**

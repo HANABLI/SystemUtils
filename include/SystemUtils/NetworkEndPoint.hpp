@@ -153,7 +153,7 @@ namespace SystemUtils {
          *        An indication of whether or not the method was successful is returned.
          */
         bool Open(
-            NewConnectionDelegate newConnectionDelegate,
+            NetworkConnectionDelegate newConnectionDelegate,
             PacketReceivedDelegate packetReceivedDelegate,
             Mode mode,
             uint32_t localAddress,
@@ -230,7 +230,7 @@ namespace SystemUtils {
          */
         std::unique_ptr< Impl > impl_;
 
-    }    
+    };    
     
 }
 
