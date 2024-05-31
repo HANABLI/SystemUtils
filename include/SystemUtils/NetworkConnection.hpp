@@ -29,9 +29,9 @@ namespace SystemUtils {
     public:
         ~NetworkConnection() noexcept;
         NetworkConnection(const NetworkConnection&) = delete;
-        NetworkConnection(NetworkConnection&&) noexcept = delete;
+        NetworkConnection(NetworkConnection&& other) noexcept = delete;
         NetworkConnection& operator=(const NetworkConnection&) = delete;
-        NetworkConnection& operator=(NetworkConnection&&) noexcept = delete;
+        NetworkConnection& operator=(NetworkConnection&& other) noexcept = delete;
         
         // public methods
     public:
@@ -79,9 +79,6 @@ namespace SystemUtils {
          * ensure that it is scoped inside the class.
         */
         struct Platform;
-
-        // Private properties
-    private:
         /**
          * This is the type of structure that contains the private
          * properties of the instance. It is defined in the implementation
@@ -89,13 +86,14 @@ namespace SystemUtils {
         */
         struct Impl;
 
-
+        // Private properties
+    private:
 
 
         /**
         * This contains the private properties of the instance.
         */
-        std::unique_ptr< Impl > impl_;
+        std::shared_ptr< Impl > impl_;
     };
 }
 
