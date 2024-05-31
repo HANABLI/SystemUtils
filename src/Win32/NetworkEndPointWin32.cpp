@@ -21,7 +21,7 @@
 #include <WS2tcpip.h>
 #include <iphlpapi.h>
 #pragma comment(lib, "ws2_32")
-#pragma comment(lib, "IPHlpApi")
+#pragma comment(lib, "iphlpapi")
 #undef ERROR
 #undef SendMessage
 #undef min
@@ -32,6 +32,8 @@
 #include <stdint.h>
 #include <thread>
 #include <mutex>
+#include <string>
+#include <assert.h>
 
 #include <SystemUtils/NetworkConnection.hpp>
 #include "../NetworkConnectionImpl.hpp"
@@ -45,7 +47,7 @@ namespace {
      * This is the maximum number of bytes to try to read
      * from a network socket at once. 
     */
-   static const size_t MAXIMUM_READ_SIZE = 65536;
+   constexpr size_t MAXIMUM_READ_SIZE = 65536;
 
 }
 

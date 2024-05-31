@@ -72,7 +72,7 @@ namespace SystemUtils
         (void)memset(&socketAddress, 0, sizeof(socketAddress));
         socketAddress.sin_family = AF_INET;
         platform->socket = socket(socketAddress.sin_family, SOCK_STREAM, 0);
-        if (platform->socket = INVALID_SOCKET) {
+        if (platform->socket == INVALID_SOCKET) {
             diagnosticsSender.SendDiagnosticInformationFormatted(
                 SystemUtils::DiagnosticsSender::Levels::ERROR,
                 "error creating socket (%d)",
@@ -109,7 +109,7 @@ namespace SystemUtils
             return false;
         }
         int socketAddressLength = sizeof(socketAddress);
-        if (getsockname(platform->socket, (struct  sockaddr*)&socketAddress, &socketAddressLength) == 0)
+        if (getsockname(platform->socket, (struct sockaddr*)&socketAddress, &socketAddressLength) == 0)
         {
             boundAddress = ntohl(socketAddress.sin_addr.S_un.S_addr);
             boundPort = ntohs(socketAddress.sin_port);
@@ -198,7 +198,7 @@ namespace SystemUtils
                     if (wsaLastError == WSAEWOULDBLOCK) {
                         wait = true;
                     } else {
-                        diagnosticsSender.SendDiagnosticInformationString(0, "connection closed abruptly by the peer");
+                        diagnosticsSender.SendDiagnosticInformationString(1, "connection closed abruptly by the peer");
                         if (Close(CloseProcedure::ImmediateDoNotStopProcessor)) {
                             processingLock.unlock();
                             brokenDelegate(false);
