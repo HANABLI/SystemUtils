@@ -12,6 +12,7 @@ set(Sources
     src/DiagnosticsSenderTests.cpp
     src/DiagnosticsContextTests.cpp
     src/DiagnosticsStreamReporterTests.cpp
+    src/NetworkConnectionTests.cpp
     src/NetworkEndPointTests.cpp
 )
 
