@@ -8,6 +8,7 @@ set(this SystemUtilsTests)
 set(Sources 
     src/StringFileTests.cpp
     src/FileTests.cpp
+    src/DynamicLibraryTests.cpp
     src/DirectoryMonitorTests.cpp
     src/DiagnosticsSenderTests.cpp
     src/DiagnosticsContextTests.cpp
@@ -27,6 +28,11 @@ target_link_libraries(${this} PUBLIC
     gtest_main 
     SystemUtils
     StringUtils
+)
+
+add_subdirectory(MockDynamicLibrary)
+add_custom_command(TARGET ${this} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:MockDynamicLibrary> $<TARGET_FILE_DIR:${this}>
 )
 
 add_test(
