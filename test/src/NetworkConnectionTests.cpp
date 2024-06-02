@@ -149,6 +149,17 @@ namespace {
             );
         }
 
+        bool AwaitDisconnection(){
+            std::unique_lock< decltype(mutex) > lock(mutex);
+            return condition.wait_for(
+                lock,
+                std::chrono::seconds(1),
+                [this]{
+                    return connectionBroken;
+                }
+            );
+        }
+
         /**
          * This method waits up to a second for a number of bytes
          * to be received from a client connected to the network endpoint.
@@ -436,8 +447,7 @@ TEST_F(NetworkConnectionTests, NetworkConnectionTests_ReceivingMessage_Test) {
         );
         callbackCondition.notify_all();
     };
-    const auto packetReceiveDelegate = [](
-        
+    const auto packetReceiveDelegate = [](     
             uint32_t address,
             uint16_t port,
             const std::vector<uint8_t>& body    
@@ -478,4 +488,77 @@ TEST_F(NetworkConnectionTests, NetworkConnectionTests_ReceivingMessage_Test) {
     clients[0]->SendMessage(messageOfBytes);
     ASSERT_TRUE(clientOwner->AwaitStream(messageOfBytes.size()));
     ASSERT_EQ(messageOfBytes, clientOwner->streamReceived);
+}
+
+TEST_F(NetworkConnectionTests, NetworkConnectionTests_CloseConnection_Test) {
+    SystemUtils::NetworkEndPoint server;
+    Owner ownerConnectionServer;
+    std::vector< std::shared_ptr< SystemUtils::NetworkConnection > > clients;
+    std::condition_variable_any conditionCallBack;
+    std::mutex mutexCallBack;
+    const auto newConnectionDelegate = [
+        &clients,
+        &conditionCallBack,
+        &mutexCallBack,
+        &ownerConnectionServer
+    ]( 
+        std::shared_ptr< SystemUtils::NetworkConnection > newConnection 
+    ){
+        std::unique_lock< std::mutex > lock(mutexCallBack);
+        clients.push_back(newConnection);
+        ASSERT_TRUE(
+            newConnection->Process(
+                [&ownerConnectionServer](const std::vector< uint8_t >& message){
+                    ownerConnectionServer.NetworkConnectionMessageReceived(message);
+                },
+                [&ownerConnectionServer](bool graceful){
+                    ownerConnectionServer.NetworkConnectionBroken(graceful);
+                }
+            )
+        );
+        conditionCallBack.notify_all();
+    };
+    const auto packReceivedDelegate =[](
+        uint32_t address,
+        uint16_t port,
+        const std::vector< uint8_t >& body
+    )
+    {
+    };
+    ASSERT_TRUE(
+        server.Open(
+            newConnectionDelegate,
+            packReceivedDelegate,
+            SystemUtils::NetworkEndPoint::Mode::Connection,
+            0,
+            0,
+            0
+        )
+    );
+    ASSERT_TRUE(client.Connect(0x7F000001, server.GetBoundPort()));
+    auto clientConnectionOwner = clientOwner;
+    ASSERT_TRUE(client.Process([clientConnectionOwner](const std::vector< uint8_t >& message ){
+        clientConnectionOwner->NetworkConnectionMessageReceived(message);
+    },
+    [clientConnectionOwner](bool graceful){
+        clientConnectionOwner->NetworkConnectionBroken(graceful);
+    })); 
+    const std::string messageAsString("Hello, World");
+    const std::vector< uint8_t > messageOfBytes(messageAsString.begin(), messageAsString.end());
+    {
+        std::unique_lock< decltype(mutexCallBack) > lock(mutexCallBack);
+        ASSERT_TRUE(
+            conditionCallBack.wait_for(
+                lock,
+                std::chrono::seconds(1),
+                [&clients]{
+                    return !clients.empty();
+                }
+            )
+        );
+    }
+    ASSERT_FALSE(ownerConnectionServer.connectionBroken);
+    client.Close();
+    ASSERT_TRUE(ownerConnectionServer.AwaitDisconnection());
+    ASSERT_TRUE(ownerConnectionServer.connectionBroken);
 }
