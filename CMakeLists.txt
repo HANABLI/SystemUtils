@@ -12,6 +12,7 @@ set(Headers
     include/SystemUtils/File.hpp
     include/SystemUtils/StringFile.hpp
     include/SystemUtils/Time.hpp
+    include/SystemUtils/DynamicLibrary.hpp
     include/SystemUtils/DirectoryMonitor.hpp
     include/SystemUtils/DiagnosticsSender.hpp
     include/SystemUtils/DiagnosticsContext.hpp
@@ -44,6 +45,7 @@ if(MSVC)
         src/Win32/NetworkConnectionWin32.hpp
         src/Win32/NetworkConnectionWin32.cpp
         src/Win32/DirectoryMonitorWin32.cpp
+        src/Win32/DynamicLibraryWin32.cpp
         src/Win32/FileWin32.cpp 
         src/Win32/TimeWin32.cpp  
     )
