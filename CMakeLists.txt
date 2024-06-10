@@ -20,6 +20,7 @@ set(Headers
     include/SystemUtils/INetworkConnection.hpp
     include/SystemUtils/NetworkConnection.hpp
     include/SystemUtils/NetworkEndPoint.hpp
+    include/SystemUtils/Subprocess.hpp
     
 )
 
@@ -36,6 +37,7 @@ set(Sources
     src/NetworkConnection.cpp
     src/NetworkEndPointImpl.hpp
     src/NetworkEndPoint.cpp
+    src/SubprocessInternal.hpp
 )
 
 if(MSVC)
@@ -46,6 +48,7 @@ if(MSVC)
         src/Win32/NetworkConnectionWin32.cpp
         src/Win32/DirectoryMonitorWin32.cpp
         src/Win32/DynamicLibraryWin32.cpp
+        src/Win32/SubprocessWin32.cpp
         src/Win32/FileWin32.cpp 
         src/Win32/TimeWin32.cpp  
     )
