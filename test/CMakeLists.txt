@@ -15,6 +15,7 @@ set(Sources
     src/DiagnosticsStreamReporterTests.cpp
     src/NetworkConnectionTests.cpp
     src/NetworkEndPointTests.cpp
+    src/SubprocessTests.cpp
 )
 
 add_executable(${this} ${Sources})
