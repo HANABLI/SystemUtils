@@ -21,6 +21,7 @@ set(Headers
     include/SystemUtils/NetworkConnection.hpp
     include/SystemUtils/NetworkEndPoint.hpp
     include/SystemUtils/Subprocess.hpp
+    include/SystemUtils/TargetInfo.hpp
     
 )
 
@@ -49,6 +50,7 @@ if(MSVC)
         src/Win32/DirectoryMonitorWin32.cpp
         src/Win32/DynamicLibraryWin32.cpp
         src/Win32/SubprocessWin32.cpp
+        src/Win32/TargetInfoWin32.cpp
         src/Win32/FileWin32.cpp 
         src/Win32/TimeWin32.cpp  
     )
