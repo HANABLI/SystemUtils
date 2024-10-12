@@ -52,7 +52,7 @@ namespace SystemUtils {
         std::vector< char > originalPath(MAX_PATH);
         (void)GetCurrentDirectoryA((DWORD)originalPath.size(), &originalPath[0]);
         (void)SetCurrentDirectoryA(path.c_str());
-        const auto library = StringUtils::sprintf("%s%s.dll", path.c_str(), name.c_str());
+        const auto library = StringUtils::sprintf("%s/%s.dll", path.c_str(), name.c_str());
         impl_->libraryHandle = LoadLibraryA(library.c_str());
         (void)SetCurrentDirectoryA(&originalPath[0]);
         return (impl_->libraryHandle != NULL);
