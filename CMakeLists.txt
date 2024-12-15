@@ -22,6 +22,7 @@ set(Headers
     include/SystemUtils/NetworkEndPoint.hpp
     include/SystemUtils/Subprocess.hpp
     include/SystemUtils/TargetInfo.hpp
+    include/SystemUtils/CryptoRandom.hpp
     
 )
 
@@ -51,6 +52,7 @@ if(MSVC)
         src/Win32/DynamicLibraryWin32.cpp
         src/Win32/SubprocessWin32.cpp
         src/Win32/TargetInfoWin32.cpp
+        src/Win32/CryptoRandomWin32.cpp
         src/Win32/FileWin32.cpp 
         src/Win32/TimeWin32.cpp  
     )
@@ -62,7 +64,7 @@ if(MSVC)
 endif()
 
 
-add_library(${this} STATIC ${Sources} ${Headers})
+add_library(${this} STATIC ${Headers} ${Sources})
 set_target_properties(${this} PROPERTIES 
     FOLDER Libraries
 )
