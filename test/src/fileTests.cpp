@@ -1,32 +1,27 @@
 /**
  * @file FileTests.cpp
- * 
- * This module contains the unit tests of the 
+ *
+ * This module contains the unit tests of the
  * SystemUtils::File class
- * 
+ *
  * © 2024 by Hatem Nabli
-*/
+ */
 
 #include <set>
 #include <gtest/gtest.h>
 #include <SystemUtils/File.hpp>
 
-
-struct FileTests: public ::testing::Test
+struct FileTests : public ::testing::Test
 {
-
     std::string testDirectoryPath;
-    
+
     virtual void SetUp() {
         testDirectoryPath = SystemUtils::File::GetExeParentDirectory() + "/testFileDirectory";
         ASSERT_TRUE(SystemUtils::File::CreateDirectory(testDirectoryPath));
     }
 
-    virtual void TearDown() {
-        ASSERT_TRUE(SystemUtils::File::DeleteDirectory(testDirectoryPath));
-    }
+    virtual void TearDown() { ASSERT_TRUE(SystemUtils::File::DeleteDirectory(testDirectoryPath)); }
 };
-
 
 TEST_F(FileTests, FileTests_Basic_Test) {
     std::string testFilePath = testDirectoryPath + "/testFile.txt";
@@ -81,7 +76,7 @@ TEST_F(FileTests, FileTests_Basic_Test) {
     file.Destroy();
     ASSERT_FALSE(file.IsExisting());
 
-    //Move the file while it's not open.
+    // Move the file while it's not open.
     file = SystemUtils::File(testFilePath);
     ASSERT_TRUE(file.OpenReadWrite());
     file.Close();
@@ -110,7 +105,7 @@ TEST_F(FileTests, FileTests_Basic_Test) {
     file.Destroy();
     ASSERT_FALSE(file.IsExisting());
 
-    //Copy file test
+    // Copy file test
     file = SystemUtils::File(testFilePath);
     ASSERT_TRUE(file.OpenReadWrite());
     const std::string helloWorldTest = "Hello, World!\r\n";
@@ -139,7 +134,8 @@ TEST_F(FileTests, FileTests_DirectoryMethods_Test) {
     SystemUtils::File file(testFilePath);
     ASSERT_TRUE(file.OpenReadWrite());
     const std::string helloWorldString = "Hello, World!\r\n";
-    ASSERT_EQ(helloWorldString.length(), file.Write(helloWorldString.data(), helloWorldString.length()));
+    ASSERT_EQ(helloWorldString.length(),
+              file.Write(helloWorldString.data(), helloWorldString.length()));
     SystemUtils::File file2(testFilePath + "2");
     ASSERT_TRUE(file.Copy(file2.GetPath()));
     file.Close();
@@ -156,10 +152,11 @@ TEST_F(FileTests, FileTests_DirectoryMethods_Test) {
     file3.Close();
 
     // Get a list of files.
-    std::vector< std::string > list;
+    std::vector<std::string> list;
     SystemUtils::File::ListDirectory(testDirectoryPath, list);
-    std::set< std::string > set(list.begin(), list.end());
-    for (const std::string& expectedElement: {"testFile.txt", "testFile.txt2", "sub"}) {
+    std::set<std::string> set(list.begin(), list.end());
+    for (const std::string& expectedElement : {"testFile.txt", "testFile.txt2", "sub"})
+    {
         const auto element = set.find(testDirectoryPath + "/" + expectedElement);
         ASSERT_FALSE(element == set.end()) << expectedElement;
         (void)set.erase(element);
@@ -191,7 +188,7 @@ TEST_F(FileTests, FileTests_RepurposeFileObjec_Test) {
     SystemUtils::File file(testFilePath1);
 
     file = testFilePath2;
-    ASSERT_EQ(testFilePath2, file.GetPath()); 
+    ASSERT_EQ(testFilePath2, file.GetPath());
 }
 
 TEST_F(FileTests, FileTests_WriteAndReadBack__Test) {
