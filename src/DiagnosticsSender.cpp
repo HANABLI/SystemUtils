@@ -128,7 +128,7 @@ namespace SystemUtils
                 { contextChain = contextChain + context + ": "; }
                 message = contextChain + message;
             }
-            for (auto subscriber : subscribers)
+            for (auto& subscriber : subscribers)
             {
                 if (level >= subscriber.second.minLevel)
                 { subscriber.second.delegate(name, level, message); }
