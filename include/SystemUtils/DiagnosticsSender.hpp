@@ -29,6 +29,7 @@ namespace SystemUtils
          */
         enum Levels : size_t
         {
+            INFO = 0,
             WARNING = 5,
             ERROR = 10,
         };
