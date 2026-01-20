@@ -423,3 +423,44 @@ TEST_F(NetworkConnectionTests, NetworkConnectionTests_CloseConnection_Test) {
     ASSERT_TRUE(ownerConnectionServer.AwaitDisconnection());
     ASSERT_TRUE(ownerConnectionServer.connectionBroken);
 }
+
+TEST_F(NetworkConnectionTests, NetworkConnectionTests_CloseDuringBrokingConnectionCallBack_Test) {
+    SystemUtils::NetworkEndPoint server;
+    Owner ownerConnectionServer;
+    std::vector<std::shared_ptr<SystemUtils::NetworkConnection>> clients;
+    std::condition_variable_any conditionCallBack;
+    std::mutex mutexCallBack;
+    const auto newConnectionDelegate =
+        [&clients, &conditionCallBack, &mutexCallBack,
+         &ownerConnectionServer](std::shared_ptr<SystemUtils::NetworkConnection> newConnection)
+    {
+        std::unique_lock<std::mutex> lock(mutexCallBack);
+        clients.push_back(newConnection);
+        ASSERT_TRUE(newConnection->Process(
+            [&ownerConnectionServer](const std::vector<uint8_t>& message)
+            { ownerConnectionServer.NetworkConnectionMessageReceived(message); },
+            [&ownerConnectionServer](bool graceful)
+            { ownerConnectionServer.NetworkConnectionBroken(graceful); }));
+        conditionCallBack.notify_all();
+    };
+    const auto packReceivedDelegate = [](uint32_t address, uint16_t port,
+                                         const std::vector<uint8_t>& body) {};
+    ASSERT_TRUE(server.Open(newConnectionDelegate, packReceivedDelegate,
+                            SystemUtils::NetworkEndPoint::Mode::Connection, 0, 0, 0));
+
+    ASSERT_TRUE(client.Connect(0x7F000001, server.GetBoundPort()));
+    auto clientConnectionOwner = clientOwner;
+    ASSERT_TRUE(
+        client.Process([clientConnectionOwner](const std::vector<uint8_t>& message)
+                       { clientConnectionOwner->NetworkConnectionMessageReceived(message); },
+                       [clientConnectionOwner](bool graceful)
+                       { clientConnectionOwner->NetworkConnectionBroken(graceful); }));
+    clientConnectionOwner->connectionBrokenDelegate = [this](bool graceful) { client.Close(); };
+    {
+        std::unique_lock<decltype(mutexCallBack)> lock(mutexCallBack);
+        ASSERT_TRUE(conditionCallBack.wait_for(lock, std::chrono::seconds(1),
+                                               [&clients] { return !clients.empty(); }));
+    }
+    clients[0]->Close();
+    clientConnectionOwner->AwaitDisconnection();
+}

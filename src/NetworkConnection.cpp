@@ -51,7 +51,7 @@ namespace SystemUtils
     void NetworkConnection::Close(bool clean) {
         if (impl_->Close(clean ? Impl::CloseProcedure::Graceful
                                : Impl::CloseProcedure::ImmediateAndStopProcessor))
-        { impl_->brokenDelegate(false); }
+        { impl_->brokenDelegate(clean); }
     }
 
     uint32_t NetworkConnection::GetAddressOfHost(const std::string& hostName) {

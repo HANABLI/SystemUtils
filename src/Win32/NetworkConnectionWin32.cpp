@@ -306,6 +306,7 @@ namespace SystemUtils
 
     bool NetworkConnection::Impl::Close(CloseProcedure procedure) {
         if ((procedure == CloseProcedure::ImmediateAndStopProcessor) &&
+            (std::this_thread::get_id() != platform->processor.get_id()) &&
             platform->processor.joinable())
         {
             platform->processorStop = true;
