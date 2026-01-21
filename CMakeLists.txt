@@ -3,7 +3,7 @@
 # © 2024 by Hatem Nabli
 
 
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.20)
 set(this SystemUtils)
 
 set(Headers 
