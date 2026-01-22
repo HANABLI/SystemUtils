@@ -1,11 +1,11 @@
-# CMakeLists.txt for UriTests
+# CMakeLists.txt for SystemUtilsTests
 #
 # © 2024 by Hatem Nabli
 
 cmake_minimum_required(VERSION 3.20)
 set(this SystemUtilsTests)
 
-set(Sources 
+set(Sources
     src/StringFileTests.cpp
     src/FileTests.cpp
     src/DynamicLibraryTests.cpp
@@ -20,14 +20,14 @@ set(Sources
 )
 
 add_executable(${this} ${Sources})
-set_target_properties(${this} PROPERTIES 
+set_target_properties(${this} PROPERTIES
     FOLDER Tests
 )
 
 target_include_directories(${this} PRIVATE ../src)
 
-target_link_libraries(${this} PUBLIC 
-    gtest_main 
+target_link_libraries(${this} PUBLIC
+    gtest_main
     SystemUtils
     StringUtils
 )
@@ -43,6 +43,6 @@ add_custom_command(TARGET ${this} POST_BUILD
 )
 
 add_test(
-    NAME ${this} 
+    NAME ${this}
     COMMAND ${this}
 )
