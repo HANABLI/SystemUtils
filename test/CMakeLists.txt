@@ -24,7 +24,7 @@ set_target_properties(${this} PROPERTIES
     FOLDER Tests
 )
 
-target_include_directories(${this} PRIVATE ../src)
+target_include_directories(${this} PRIVATE ..)
 
 target_link_libraries(${this} PUBLIC
     gtest_main
