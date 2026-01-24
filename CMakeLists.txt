@@ -6,7 +6,7 @@
 cmake_minimum_required(VERSION 3.20)
 set(this SystemUtils)
 
-set(Headers 
+set(Headers
     include/SystemUtils/IFile.hpp
     include/SystemUtils/IFileSystemEntry.hpp
     include/SystemUtils/File.hpp
@@ -23,16 +23,16 @@ set(Headers
     include/SystemUtils/Subprocess.hpp
     include/SystemUtils/TargetInfo.hpp
     include/SystemUtils/CryptoRandom.hpp
-    
+
 )
 
-set(Sources 
+set(Sources
     src/File.cpp
     src/FileImpl.hpp
     src/StringFile.cpp
     src/DataQueue.hpp
     src/DataQueue.cpp
-    src/DiagnosticsSender.cpp   
+    src/DiagnosticsSender.cpp
     src/DiagnosticsContext.cpp
     src/DiagnosticsStreamReporter.cpp
     src/NetworkConnectionImpl.hpp
@@ -43,7 +43,7 @@ set(Sources
 )
 
 if(MSVC)
-    list(APPEND Sources 
+    list(APPEND Sources
         src/Win32/NetworkEndPointWin32.hpp
         src/Win32/NetworkEndPointWin32.cpp
         src/Win32/NetworkConnectionWin32.hpp
@@ -53,10 +53,10 @@ if(MSVC)
         src/Win32/SubprocessWin32.cpp
         src/Win32/TargetInfoWin32.cpp
         src/Win32/CryptoRandomWin32.cpp
-        src/Win32/FileWin32.cpp 
-        src/Win32/TimeWin32.cpp  
+        src/Win32/FileWin32.cpp
+        src/Win32/TimeWin32.cpp
     )
-    set(TargetFolders Win32) 
+    set(TargetFolders Win32)
     add_definitions(
         -DUNICODE -D_UNICODE
         -D_CRT_SOURCE_NO_WARNINGS
@@ -65,7 +65,7 @@ endif()
 
 
 add_library(${this} STATIC ${Headers} ${Sources})
-set_target_properties(${this} PROPERTIES 
+set_target_properties(${this} PROPERTIES
     FOLDER Libraries
 )
 target_link_libraries(${this} PUBLIC
@@ -74,5 +74,6 @@ target_link_libraries(${this} PUBLIC
 
 
 target_include_directories(${this} PUBLIC include)
-
-add_subdirectory(test)
+if(WIN32)
+  add_subdirectory(test)
+endif()
