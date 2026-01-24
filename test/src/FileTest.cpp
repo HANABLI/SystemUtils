@@ -11,7 +11,7 @@
 #include <gtest/gtest.h>
 #include <SystemUtils/File.hpp>
 
-struct FileTest : public ::testing::Test
+struct FileTests : public ::testing::Test
 {
     std::string testDirectoryPath;
 
@@ -23,7 +23,7 @@ struct FileTest : public ::testing::Test
     virtual void TearDown() { ASSERT_TRUE(SystemUtils::File::DeleteDirectory(testDirectoryPath)); }
 };
 
-TEST_F(FileTest, FileTests_Basic_Test) {
+TEST_F(FileTests, FileTests_Basic_Test) {
     std::string testFilePath = testDirectoryPath + "/testFile.txt";
     SystemUtils::File testArea(testDirectoryPath);
     SystemUtils::File file(testFilePath);
@@ -127,7 +127,7 @@ TEST_F(FileTest, FileTests_Basic_Test) {
     ASSERT_FALSE(file.IsExisting());
 }
 
-TEST_F(FileTest, FileTests_DirectoryMethods_Test) {
+TEST_F(FileTests, FileTests_DirectoryMethods_Test) {
     //
     SystemUtils::File testDirectory(testDirectoryPath);
     const std::string testFilePath = testDirectoryPath + "/testFile.txt";
@@ -182,7 +182,7 @@ TEST_F(FileTest, FileTests_DirectoryMethods_Test) {
     ASSERT_FALSE(file4.IsExisting());
 }
 
-TEST_F(FileTest, FileTests_RepurposeFileObjec_Test) {
+TEST_F(FileTests, FileTests_RepurposeFileObjec_Test) {
     const std::string testFilePath1 = testDirectoryPath + "/toto.txt";
     const std::string testFilePath2 = testDirectoryPath + "/titi.txt";
     SystemUtils::File file(testFilePath1);
@@ -191,7 +191,7 @@ TEST_F(FileTest, FileTests_RepurposeFileObjec_Test) {
     ASSERT_EQ(testFilePath2, file.GetPath());
 }
 
-TEST_F(FileTest, FileTests_WriteAndReadBack__Test) {
+TEST_F(FileTests, FileTests_WriteAndReadBack__Test) {
     const std::string testFilePath = testDirectoryPath + "/toto.txt";
     SystemUtils::File file(testFilePath);
     ASSERT_TRUE(file.OpenReadWrite());
