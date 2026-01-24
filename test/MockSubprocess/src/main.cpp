@@ -6,10 +6,11 @@
 #include <SystemUtils/IFile.hpp>
 #include <SystemUtils/Subprocess.hpp>
 
-#ifdef _WIN32
+#ifndef _WIN32
 #    include <sstream>
 #    include <sys/types.h>
 #    include <sys/stat.h>
+#    include <unistd.h>
 #    include <vector>
 #endif /* not _WIN32 */
 
