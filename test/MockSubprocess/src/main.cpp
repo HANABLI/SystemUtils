@@ -3,13 +3,13 @@
 #include <stdlib.h>
 #include <string>
 #include <SystemUtils/File.hpp>
+#include <SystemUtils/IFile.hpp>
 #include <SystemUtils/Subprocess.hpp>
 
-#ifndef _WIN32
+#ifdef _WIN32
 #    include <sstream>
 #    include <sys/types.h>
 #    include <sys/stat.h>
-#    include <unistd.h>
 #    include <vector>
 #endif /* not _WIN32 */
 
