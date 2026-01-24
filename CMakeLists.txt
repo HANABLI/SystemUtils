@@ -42,7 +42,7 @@ set(Sources
     src/SubprocessInternal.hpp
 )
 
-if(MSVC)
+if(WIN32)
     list(APPEND Sources
         src/Win32/NetworkEndPointWin32.hpp
         src/Win32/NetworkEndPointWin32.cpp
