@@ -32,15 +32,15 @@ target_link_libraries(${this} PUBLIC
     StringUtils
 )
 
-add_subdirectory(MockDynamicLibrary)
-add_custom_command(TARGET ${this} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:MockDynamicLibrary> $<TARGET_FILE_DIR:${this}>
-)
+# add_subdirectory(MockDynamicLibrary)
+# add_custom_command(TARGET ${this} POST_BUILD
+#     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:MockDynamicLibrary> $<TARGET_FILE_DIR:${this}>
+# )
 
-add_subdirectory(MockSubprocess)
-add_custom_command(TARGET ${this} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:MockSubprocess> $<TARGET_FILE_DIR:${this}>
-)
+# add_subdirectory(MockSubprocess)
+# add_custom_command(TARGET ${this} POST_BUILD
+#     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:MockSubprocess> $<TARGET_FILE_DIR:${this}>
+# )
 
 add_test(
     NAME ${this}
