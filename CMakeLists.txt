@@ -63,6 +63,12 @@ if(WIN32)
     )
 endif()
 
+if(UNIX)
+    list(APPEND Sources
+        src/Posix/CryptoRandomPosix.cpp
+    )
+endif()
+
 
 add_library(${this} STATIC ${Headers} ${Sources})
 set_target_properties(${this} PROPERTIES
