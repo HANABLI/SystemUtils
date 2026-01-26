@@ -61,11 +61,17 @@ if(WIN32)
         -DUNICODE -D_UNICODE
         -D_CRT_SOURCE_NO_WARNINGS
     )
+elseif(LINUX)
+    list(APPEND Sources
+        src/Linux/DynamicLibraryImpl.cpp
+    )
 endif()
 
 if(UNIX)
     list(APPEND Sources
         src/Posix/CryptoRandomPosix.cpp
+        src/Posix/DynamicLibrayImpl.hpp
+        src/Posix/DynamicLibraryPosix.cpp
     )
 endif()
 
