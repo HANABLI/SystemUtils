@@ -70,7 +70,7 @@ endif()
 if(UNIX)
     list(APPEND Sources
         src/Posix/CryptoRandomPosix.cpp
-        src/Posix/DynamicLibrayImpl.hpp
+        src/Posix/DynamicLibraryImpl.hpp
         src/Posix/DynamicLibraryPosix.cpp
     )
 endif()
