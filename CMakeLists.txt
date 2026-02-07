@@ -72,6 +72,8 @@ if(UNIX)
         src/Posix/CryptoRandomPosix.cpp
         src/Posix/DynamicLibraryImpl.hpp
         src/Posix/DynamicLibraryPosix.cpp
+        src/Posix/FilePosix.hpp
+        src/Posix/FilePosix.cpp
     )
 endif()
 
