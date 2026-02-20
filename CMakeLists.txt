@@ -64,6 +64,7 @@ if(WIN32)
 elseif(LINUX)
     list(APPEND Sources
         src/Linux/DynamicLibraryImpl.cpp
+        src/Linux/SubprocessLinux.cpp
         src/Linux/FileLinux.cpp
     )
 endif()
