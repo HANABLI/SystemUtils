@@ -1,5 +1,6 @@
 
 #include <corecrt_wstdio.h>
+#include <SystemUtils/File.hpp>
 #include "../FileImpl.hpp"
 #include "FilePosix.hpp"
 #include <memory>
