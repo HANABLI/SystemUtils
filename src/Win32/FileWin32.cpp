@@ -231,7 +231,7 @@ namespace SystemUtils
         return StringUtils::sprintf("%s/%s", pathNarrow.c_str(), nameKey.c_str());
     }
 
-    std::string File::GetUserSavedGameDirectory(const std::string& nameKey) {
+    std::string File::GetUserSavedProjectDirectory(const std::string& nameKey) {
         PWSTR pathWide;
         if (SHGetKnownFolderPath(FOLDERID_SavedGames, 0, NULL, &pathWide) != S_OK)
         { return ""; }

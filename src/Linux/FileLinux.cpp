@@ -38,7 +38,7 @@ namespace SystsemUtils
         return StringUtils::sprintf("%s%s", GetUserHomeDirectory().c_str(), nameKey.c_str());
     }
 
-    std::string File::GetUserSavedProjetcDirectory(const std::string& nameKey) {
+    std::string File::GetUserSavedProjectDirectory(const std::string& nameKey) {
         return StringUtils::sprintf("%s/ .%s/Saved Projects", GetUserHomeDirectory().c_str(),
                                     nameKey.c_str());
     }
