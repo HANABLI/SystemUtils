@@ -77,8 +77,8 @@ if(UNIX)
         src/Posix/SubprocessPosix.cpp
         src/Posix/FilePosix.hpp
         src/Posix/FilePosix.cpp
-        src/Posix/SignalPipe.hpp
-        src/Posix/SignalPipe.cpp
+        src/Posix/PipeSignal.hpp
+        src/Posix/PipeSignal.cpp
     )
 endif()
 

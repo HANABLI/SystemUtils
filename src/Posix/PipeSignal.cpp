@@ -7,6 +7,7 @@
 #include <sys/types.h>
 #include <sys/select.h>
 #include <unistd.h>
+#include <string.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -49,7 +50,8 @@ namespace SystemUtils
 
         for (int i = 0; i < 2; ++i)
         {
-            if (fcntl(impl_->pipe[i], F_GETFL, 0) < 0)
+            int flags = fcntl(impl_->pipe[i], F_GETFL, 0);
+            if ( flags < 0)
             {
                 (void)close(impl_->pipe[0]);
                 (void)close(impl_->pipe[1]);
