@@ -1,13 +1,15 @@
 #include "../Posix/FilePosix.hpp"
-
+#include <SystemUtils/File.hpp>
 #include <StringUtils/StringUtils.hpp>
+#include <vector>
+#include <string>
 #include <dirent.h>
 #include <errno.h>
 #include <pwd.h>
 #include <stddef.h>
 #include <stdint.h>
 
-namespace SystsemUtils
+namespace SystemUtils
 {
     std::string File::GetExeImagePath() {
         std::vector<char> buffer(PATH_MAX);
