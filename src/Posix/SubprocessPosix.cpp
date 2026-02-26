@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <pwd.h>
 #include <sys/select.h>
 #include <sys/stat.h>
 #include <sys/time.h>
@@ -89,7 +90,7 @@ namespace SystemUtils
             int status = 0;
             pid_t childRead;
             do
-            { childRead = ::waitpid(child, &status, 0); } while (r < 0 && errno == EINTR);
+            { childRead = ::waitpid(child, &status, 0); } while (childRead < 0 && errno == EINTR);
 
             if (childRead == child)
             {
@@ -114,7 +115,8 @@ namespace SystemUtils
             if (worker.joinable())
             {
                 worker.join();
-                child = -1(void)close(pipe);
+                child = -1;
+                (void)close(pipe);
                 pipe = -1;
             }
         }
@@ -146,11 +148,11 @@ namespace SystemUtils
         { return 0; }
 
         std::vector<std::vector<char>> childArgs;
-        childArgs.emplace_back(VectorFromString(program));
-        childArgs.emplace_back(VectorFromString("child"));
-        childArgs.emplace_back(VectorFromString(StringExtensions::sprintf("%d", pipeEnds[1])));
+        childArgs.emplace_back(VectorFromStr(program));
+        childArgs.emplace_back(VectorFromStr("child"));
+        childArgs.emplace_back(VectorFromStr(StringUtils::sprintf("%d", pipeEnds[1])));
         for (const auto arg : args)
-        { childArgs.emplace_back(VectorFromString(arg)); }
+        { childArgs.emplace_back(VectorFromStr(arg)); }
         // Launch program.
         impl_->child = fork();
         if (impl_->child == 0)
@@ -180,9 +182,9 @@ namespace SystemUtils
         if (pipe(pipeEnds) < 0)
         { return 0; }
         std::vector<std::vector<char>> childArgs;
-        childArgs.push_back(VectorFromString(program));
+        childArgs.push_back(VectorFromStr(program));
         for (const auto arg : args)
-        { childArgs.push_back(VectorFromString(args)); }
+        { childArgs.push_back(VectorFromStr(arg)); }
         const auto child = fork();
         if (child == 0)
         {
@@ -228,7 +230,7 @@ namespace SystemUtils
     }
 
     bool Subprocess::ContactParent(std::vector<std::string>& args) {
-        if (args.size() < 2 || args[0] != child)
+        if (args.size() < 2 || args[0] != "child")
         { return false; }
         int pipeNumber;
         if (sscanf(args[1].c_str(), "%d", &pipeNumber) != 1)

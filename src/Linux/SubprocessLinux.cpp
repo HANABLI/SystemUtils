@@ -1,7 +1,6 @@
 #include <SystemUtils/Subprocess.hpp>
 #include <SystemUtils/File.hpp>
 #include <StringUtils/StringUtils.hpp>
-#include <sstream>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -9,9 +8,12 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <sstream>
+#include <fstream>
 #include <sys/select.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/param.h>
 
 namespace SystemUtils
 {
@@ -28,7 +30,7 @@ namespace SystemUtils
         }
     }
 
-    std::vector<ProcessInfo> Subprocess::GetProcessList() {
+    std::vector<Subprocess::ProcessInfo> Subprocess::GetProcessList() {
         std::vector<std::string> process;
         const std::string procDir("/proc");
         SystemUtils::File::ListDirectory(procDir, process);
@@ -44,7 +46,7 @@ namespace SystemUtils
                 if (realpath(exePath.c_str(), &buffer[0]) == NULL)
                 { continue; }
                 processInfo.image = std::string(buffer.data());
-                processes.push_back(std::move(process));
+                processes.push_back(std::move(processInfo));
             }
         }
 
@@ -96,7 +98,7 @@ namespace SystemUtils
                 {
                     auto inodesToTcpPortEntry = inodesToTcpPorts.find(inode);
                     if (inodesToTcpPortEntry != inodesToTcpPorts.end())
-                    { (void)process.tcpServerPorts.insert(inodesToTcpPortEntry->second) }
+                    { (void)process.tcpServerPorts.insert(inodesToTcpPortEntry->second); }
                 }
             }
         }
