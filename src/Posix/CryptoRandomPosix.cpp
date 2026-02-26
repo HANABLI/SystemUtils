@@ -2,7 +2,7 @@
  * @file CryptoRandomPosix.cpp
  * @brief This module contain the POSIX implementation of the SystemUtils::CryptoRandomPosix
  * class.
- * @copyright 2026 by Hatem Nabli
+ * @copyright © 2026 by Hatem Nabli.
  */
 #include <fcntl.h>
 #include <stdio.h>
@@ -23,6 +23,8 @@ namespace SystemUtils
          */
         int rn;
     };
+
+    CryptoRandom::~CryptoRandom() = default;
 
     CryptoRandom::CryptoRandom() : impl_(std::make_unique<Impl>()) {
         impl_->rn = open("/dev/urandom", O_RDONLY);
