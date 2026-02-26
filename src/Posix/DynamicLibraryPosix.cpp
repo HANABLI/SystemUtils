@@ -5,6 +5,9 @@
  */
 
 #include <assert.h>
+#include <unistd.h>
+#include <dlfcn.h>
+#include <sys/param.h>
 #include <memory>
 #include <vector>
 #include "DynamicLibraryImpl.hpp"
@@ -40,7 +43,7 @@ namespace SystemUtils
     void DynamicLibrary::Unload() {
         if (impl_->libraryHandle != NULL)
         {
-            (void)dlcose(impl_->libraryHandle);
+            (void)dlclose(impl_->libraryHandle);
             impl_->libraryHandle = NULL;
         }
     }
