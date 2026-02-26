@@ -65,7 +65,9 @@ elseif(LINUX)
     list(APPEND Sources
         src/Linux/DynamicLibraryImpl.cpp
         src/Linux/SubprocessLinux.cpp
+        src/Linux/DirectoryMonitor.cpp
         src/Linux/FileLinux.cpp
+        src/Linux/TimeLinux.cpp
     )
 endif()
 
