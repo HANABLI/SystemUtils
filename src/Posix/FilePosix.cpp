@@ -1,5 +1,4 @@
 
-#include <corecrt_wstdio.h>
 #include <SystemUtils/File.hpp>
 #include "../FileImpl.hpp"
 #include "FilePosix.hpp"
@@ -7,12 +6,19 @@
 #include <string>
 #include <regex>
 #include <vector>
+#include <pwd.h>
+#include <dirent.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <dirent.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <sys/param.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 namespace
 {
@@ -70,7 +76,7 @@ namespace SystemUtils
         return (impl_->platform_->handle >= 0);
     }
 
-    bool File::Close() {
+    void File::Close() {
         if (impl_->platform_->handle < 0)
         { return; }
         (void)close(impl_->platform_->handle);
@@ -164,7 +170,7 @@ namespace SystemUtils
         if ((directoryWithSeparator.length() > 0) &&
             (directoryWithSeparator[directoryWithSeparator.length() - 1] != '/'))
         { directoryWithSeparator += '/'; }
-        list.clear();
+        listOfDirectories.clear();
         DIR* dir = opendir(directory.c_str());
         if (dir != NULL)
         {
@@ -187,7 +193,7 @@ namespace SystemUtils
         }
     }
 
-    void File::DeleteDirectory(const std::string& directory) {
+    bool File::DeleteDirectory(const std::string& directory) {
         std::string directoryWithSeparator(directory);
         if ((directoryWithSeparator.length() > 0) &&
             (directoryWithSeparator[directoryWithSeparator.length() - 1] != '/'))
@@ -230,10 +236,10 @@ namespace SystemUtils
         if ((existingDirectoryWithSeparator.length() > 0) &&
             (existingDirectoryWithSeparator[existingDirectoryWithSeparator.length() - 1] != '/'))
         { existingDirectoryWithSeparator += '/'; }
-        if (!Impl::CreatePath(newDirectoryWithSeparator))
+        if (!Impl::CreatePath(newDirectory))
         { return false; }
         DIR* dir = opendir(existingDirectory.c_str());
-        if (dir != NuLL)
+        if (dir != NULL)
         {
             struct dirent entry;
             struct dirent* entryBack;
@@ -249,7 +255,7 @@ namespace SystemUtils
                 { continue; }
                 std::string filePath(existingDirectoryWithSeparator);
                 filePath += entry.d_name;
-                std::string newFilePath(newDirectroyWithSeparator);
+                std::string newFilePath(newDirectory);
                 newFilePath += entry.d_name;
                 if (entry.d_type == DT_DIR)
                 {
@@ -257,9 +263,9 @@ namespace SystemUtils
                     { return false; }
                 } else if (entry.d_type == DT_LNK)
                 {
-                    if (readlink(filePath.c_str(), &link[0], link.size()) < 0)
+                    if (readlink(filePath.c_str(), &buffer[0], buffer.size()) < 0)
                     { return false; }
-                    if (symlink(&link[0], newFilePath.c_str()) < 0)
+                    if (symlink(&buffer[0], newFilePath.c_str()) < 0)
                     { return false; }
                 } else
                 {
@@ -344,7 +350,7 @@ namespace SystemUtils
         if (impl_->platform_->handle < 0)
         { return 0; }
         const auto amountWrite = write(impl_->platform_->handle, buffer, numBytes);
-        return ((amountWrite < 0) ? size_t(0) : (size_t)amountWritten);
+        return ((amountWrite < 0) ? size_t(0) : (size_t)amountWrite);
     }
 
     std::shared_ptr<IFile> File::Clone() {
