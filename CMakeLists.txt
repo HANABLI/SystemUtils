@@ -77,6 +77,8 @@ if(UNIX)
         src/Posix/DynamicLibraryImpl.hpp
         src/Posix/DynamicLibraryPosix.cpp
         src/Posix/SubprocessPosix.cpp
+        src/Posix/NetworkConnectionPosix.hpp
+        src/Posix/NetworkConnectionPosix.cpp
         src/Posix/FilePosix.hpp
         src/Posix/FilePosix.cpp
         src/Posix/PipeSignal.hpp
