@@ -79,6 +79,8 @@ if(UNIX)
         src/Posix/SubprocessPosix.cpp
         src/Posix/NetworkConnectionPosix.hpp
         src/Posix/NetworkConnectionPosix.cpp
+        src/Posix/NetworkEndPointPosix.hpp
+        src/Posix/NetworkEndPointPosix.cpp
         src/Posix/FilePosix.hpp
         src/Posix/FilePosix.cpp
         src/Posix/PipeSignal.hpp
