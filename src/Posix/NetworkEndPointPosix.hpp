@@ -18,7 +18,7 @@ namespace SystemUtils {
      * This struct contains the Posix private properties of the
      * NetworkEndpoint class.
      */
-    struct NetworkEndpoint::Platform {
+    struct NetworkEndPoint::Platform {
         /**
          * This is the endpoint exchange packet structure.
          */

@@ -20,7 +20,8 @@
 #include <vector>
 
 namespace {
-
+    static const size_t MAXIMUM_READ_SIZE = 65536;
+    static const size_t MAXIMUM_WRITE_SIZE = 65536;
 }
 
 namespace SystemUtils {
@@ -246,7 +247,7 @@ namespace SystemUtils {
                         Close(false);
                         break;
                     } else if (dataReceived > 0) {
-                        buffer.resize((size_t)amountReceived);
+                        buffer.resize((size_t)dataReceived);
                         packetReceivedDelegate(
                             ntohl(peerAddress.sin_addr.s_addr),
                             ntohs(peerAddress.sin_port),
@@ -263,8 +264,8 @@ namespace SystemUtils {
                 peerAddress.sin_port = htons(packet.port);
                 const ssize_t dataSent = sendto(
                     platform->networkSocket,
-                    &packet.body[0],
-                    packet.body.size(),
+                    &packet.data[0],
+                    packet.data.size(),
                     MSG_NOSIGNAL,
                     (const sockaddr*)&peerAddress,
                     sizeof(peerAddress)
@@ -280,12 +281,12 @@ namespace SystemUtils {
                         break;
                     }
                 } else {
-                    if ((size_t)dataSent != packet.body.size()) {
+                    if ((size_t)dataSent != packet.data.size()) {
                         diagnosticsSender.SendDiagnosticInformationFormatted(
                             SystemUtils::DiagnosticsSender::Levels::ERROR,
                             "send truncated (%d < %d)",
                             (int)dataSent,
-                            (int)packet.body.size()
+                            (int)packet.data.size()
                         );
                     }
                     platform->outputQueue.pop_front();
@@ -297,19 +298,19 @@ namespace SystemUtils {
         }
     }
 
-    void NetworkEndPoint::Impl::SendPacket(uint32_t address, uint16_t port, const std::vector<uint8_t>& body) {
+    void NetworkEndPoint::Impl::SendPacket(uint32_t address, uint16_t port, const std::vector<uint8_t>& data) {
         std::unique_lock<std::recursive_mutex> workingLock(platform->workingMutex);
         NetworkEndPoint::Platform::Packet packet;
         packet.address = address;
         packet.port = port;
-        packet.body = body;
+        packet.data = data;
         platform->outputQueue.emplace_back(std::move(packet));
         platform->workerSignal.Set();
     }
 
     void NetworkEndPoint::Impl::Close(bool stopWorking) {
         if (stopWorking && platform->worker.joinable()) {
-            platform->workerStop = true;
+            platform->stopWorker = true;
             platform->workerSignal.Set();
             platform->worker.join();
         }
