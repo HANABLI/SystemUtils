@@ -73,7 +73,7 @@ namespace SystemUtils {
             if (mode == NetworkEndPoint::Mode::MulticastReceive) {
                 int option = 1;
                 if (setsockopt(platform->networkSocket, SOL_SOCKET, SO_REUSEADDR, (const char*)&option, sizeof(option)) < 0) {
-                    diagnosticsSender.SendDiagnosticsInformationFormatted(
+                    diagnosticsSender.SendDiagnosticInformationFormatted(
                         SystemUtils::DiagnosticsSender::Levels::ERROR,
                         "error setting option SO_REUSEADDR: %s",
                         strerror(errno)
@@ -87,7 +87,7 @@ namespace SystemUtils {
             }
             peerAddress.sin_port = htons(port);
             if (bind(platform->networkSocket, (struct sockaddr*)&peerAddress, sizeof(peerAddress)) != 0) {
-                diagnosticsSender.SendDiagnosticsInformationFormatted(
+                diagnosticsSender.SendDiagnosticInformationFormatted(
                     SystemUtils::DiagnosticsSender::Levels::ERROR,
                     "error in bing: %s",
                     strerror(errno)
@@ -154,13 +154,13 @@ namespace SystemUtils {
             flags != O_NONBLOCK;
             (void)fcntl(platform->networkSocket, F_SETFL, flags);
         }
-        diagnosticSender.SendDiagnosticInformationFormatted(
+        diagnosticsSender.SendDiagnosticInformationFormatted(
             SystemUtils::DiagnosticsSender::Levels::INFO,
             "endpoint opened for %" PRIu16,
             port
         );
         platform->stopWorker = false;
-        platform->worker = std::thread(&NetworkEndPoint::Impl::Processor, this);
+        platform->worker = std::thread(&NetworkEndPoint::Impl::Work, this);
         return true;
     }
 
@@ -171,7 +171,7 @@ namespace SystemUtils {
         std::vector< uint8_t > buffer;
         std::unique_lock< std::recursive_mutex > workingLock(platform->workingMutex);
         bool wait = true;
-        while(!platform->workerStop) {
+        while(!platform->stopWorker) {
             if (wait) {
                 FD_ZERO(&readfds);
                 FD_ZERO(&writefds);
@@ -182,7 +182,7 @@ namespace SystemUtils {
                 FD_SET(workerStateChangeSelectHandle, &readfds);
                 workingLock.unlock();
                 (void)select(nfds, &readfds, &writefds, NULL, NULL);
-                workingLock.Lock();
+                workingLock.lock();
                 if (FD_ISSET(workerStateChangeSelectHandle, &readfds) != 0) {
                     platform->workerSignal.Clear();
                 }
@@ -210,15 +210,15 @@ namespace SystemUtils {
                         int flags = fcntl(client, F_GETFL, 0);
                         flags |= O_NONBLOCK;
                         (void)fcntl(client, F_SETFL, flags);
-                        uint32_t boundIpv4Addess;
+                        uint32_t boundIpv4Address;
                         uint16_t boundPort = 0;
                         struct sockaddr_in boundAddress;
-                        socklen_t boundAddessSize = sizeof(boundAddress);
+                        socklen_t boundAddressSize = sizeof(boundAddress);
                         if (getsockname(client, (struct sockaddr*)&boundAddress, &boundAddressSize) == 0) {
                             boundIpv4Address = ntohl(boundAddress.sin_addr.s_addr);
                             boundPort = ntohs(boundAddress.sin_port);
                         }
-                        auto connection = NetworkEndPoint::Platform::MakeConnectionFromExistingSocket(
+                        auto connection = NetworkConnection::Platform::MakeConnectionFromExistingSocket(
                             client,
                             boundIpv4Address,
                             boundPort,
@@ -236,7 +236,7 @@ namespace SystemUtils {
                         buffer.size(),
                         MSG_NOSIGNAL,
                         (struct sockaddr*)&peerAddress,
-                        &peerAddressSize
+                        &peerAddressLength
                     );
                     if (dataReceived < 0) {
                         diagnosticsSender.SendDiagnosticInformationFormatted(
@@ -270,14 +270,14 @@ namespace SystemUtils {
                     (const sockaddr*)&peerAddress,
                     sizeof(peerAddress)
                 );
-                if (amoutSent < 0) {
+                if (dataSent < 0) {
                     if (errno != EWOULDBLOCK) {
                         diagnosticsSender.SendDiagnosticInformationFormatted(
                             SystemUtils::DiagnosticsSender::Levels::ERROR,
                             "error in sendto: %s",
                             strerror(errno)
                         );
-                        close(false),
+                        close(false);
                         break;
                     }
                 } else {
@@ -290,7 +290,7 @@ namespace SystemUtils {
                         );
                     }
                     platform->outputQueue.pop_front();
-                    if(!platform->outputQueue.emplty()) {
+                    if(!platform->outputQueue.empty()) {
                         wait = false;
                     }
                 }
