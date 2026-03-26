@@ -30,6 +30,8 @@ namespace SystemUtils
         std::string lastError;
     };
 
+    PipeSignal::PipeSignal() : impl_(std::make_unique<PipeSignalImpl>()) {}
+
     PipeSignal::~PipeSignal() {
         if (impl_->pipe[0] >= 0)
         { (void)close(impl_->pipe[0]); }
