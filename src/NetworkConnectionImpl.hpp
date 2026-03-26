@@ -20,19 +20,19 @@ namespace SystemUtils
         {
             /**
              * This indicates that the connection should be terminated
-             * immediately without stopping processor thread.
+             * immediately without stopping worker thread.
              */
-            ImmediateDoNotStopProcessor,
+            ImmediateDoNotStopWorker,
 
             /**
              * This indicates that the connection should be terminated
-             * immediately, and the processor thread should be joined.
+             * immediately, and the worker thread should be joined.
              */
-            ImmediateAndStopProcessor,
+            ImmediateAndStopWorker,
             /**
              * This indicates that the connection should be gracefully
              * closed, meaning all data queud to be sent should first be
-             * sent by the processor thread, and then the socket should
+             * sent by the worker thread, and then the socket should
              * be market as no longer sending data, and then it should be
              * closed.
              */
@@ -116,7 +116,7 @@ namespace SystemUtils
          *      An indication of whether or not the method was
          *      successful is returned.
          */
-        bool Process();
+        bool DoWork();
 
         /**
          * This is the main function called for the worker thread
@@ -124,7 +124,7 @@ namespace SystemUtils
          * receiving of messages, using the underlying operating
          * system network handle.
          */
-        void Processor();
+        void Work();
 
         /**
          * This method returns an indication of whether or not there
@@ -139,7 +139,7 @@ namespace SystemUtils
         /**
          * This method appends the given data to the queu of data
          * currently being sent to the peer. The actual sending is
-         * performed by the processor worked thread.
+         * performed by the worker worked thread.
          *
          * @param[in] message
          *      This holds the data to be append to the send queue

@@ -46,7 +46,7 @@ namespace SystemUtils
          * This propertie keeps track of whether or not WSAStartup succeeded,
          * because if so we need to call WSACleanup upon teardown.
          */
-        bool wsaStarted = false;
+        bool wasStarted = false;
 
         /**
          * This is the operating system hndle to the network
@@ -58,7 +58,7 @@ namespace SystemUtils
          * This is the thread which performs all the actual
          * sending and receiving of data over the network.
          */
-        std::thread processor;
+        std::thread worker;
 
         /**
          * This is an event used with WSAEventSelect in order

@@ -158,7 +158,7 @@ namespace
             std::unique_lock<decltype(mutex)> lock(mutex);
             connections.push_back(newConnection);
             condition.notify_all();
-            (void)newConnection->Process([this](const std::vector<uint8_t>& message)
+            (void)newConnection->DoWork([this](const std::vector<uint8_t>& message)
                                          { NetworkConnectionMessageReceived(message); },
                                          [this](bool) { NetworkConnectionBrocken(); });
         }
@@ -203,19 +203,19 @@ struct NetworkEndPointTests : public ::testing::Test
      * This keeps track of whether or not WSAStartup succeeded,
      * because if so we need to call WSACleanup upon teardown.
      */
-    bool wsaStarted = false;
+    bool wasStarted = false;
 
     virtual void SetUp() {
 #if _WIN32
         WSADATA wsaData;
         if (!WSAStartup(MAKEWORD(2, 0), &wsaData))
-        { wsaStarted = true; }
+        { wasStarted = true; }
 #endif /* _WIN32 */
     }
 
     virtual void TearDown() {
 #if _WIN32
-        if (wsaStarted)
+        if (wasStarted)
         { (void)WSACleanup(); }
 #endif /* _WIN32 */
     }

@@ -165,7 +165,7 @@ namespace
             std::unique_lock<decltype(mutex)> lock(mutex);
             connections.push_back(newConnection);
             condition.notify_all();
-            (void)newConnection->Process([this](const std::vector<uint8_t>& message)
+            (void)newConnection->DoWork([this](const std::vector<uint8_t>& message)
                                          { NetworkConnectionMessageReceived(message); },
                                          [this](bool graceful)
                                          { NetworkConnectionBroken(graceful); });
@@ -211,7 +211,7 @@ struct NetworkConnectionTests : public ::testing::Test
      * This keeps track of whether or not WSAStartup succeeded,
      * because if we need to call WSACleanup upon teardown.
      */
-    bool wsaStarted = false;
+    bool wasStarted = false;
 
     /**
      * This is the unit inder test client
@@ -246,7 +246,7 @@ struct NetworkConnectionTests : public ::testing::Test
 #if _WIN32
         WSADATA WSAData;
         if (!WSAStartup(MAKEWORD(2, 0), &WSAData))
-        { wsaStarted = true; }
+        { wasStarted = true; }
 #endif /* _WIN32 */
         diagnosticUnsubscribeDelegate = client.SubscribeToDiagnostics(
             [this](std::string senderName, size_t level, std::string message)
@@ -262,7 +262,7 @@ struct NetworkConnectionTests : public ::testing::Test
     virtual void TearDown() {
         diagnosticUnsubscribeDelegate();
 #if _WIN32
-        if (wsaStarted)
+        if (wasStarted)
         { (void)WSACleanup(); }
 #endif /* _WIN32 */
     }
@@ -312,7 +312,7 @@ TEST_F(NetworkConnectionTests, NetworkConnectionTests_SendingMessage_Test) {
     {
         std::unique_lock<std::mutex> lock(callbackMutex);
         clients.push_back(newConnection);
-        ASSERT_TRUE(newConnection->Process(
+        ASSERT_TRUE(newConnection->DoWork(
             [&serverConnectionOwner](const std::vector<uint8_t>& message)
             { serverConnectionOwner.NetworkConnectionMessageReceived(message); },
             [&serverConnectionOwner](bool graceful)
@@ -328,7 +328,7 @@ TEST_F(NetworkConnectionTests, NetworkConnectionTests_SendingMessage_Test) {
     ASSERT_TRUE(client.Connect(0x7F000001, server.GetBoundPort()));
     auto clientConnectionOwner = clientOwner;
     ASSERT_TRUE(
-        client.Process([clientConnectionOwner](const std::vector<uint8_t>& message)
+        client.DoWork([clientConnectionOwner](const std::vector<uint8_t>& message)
                        { clientConnectionOwner->NetworkConnectionMessageReceived(message); },
                        [clientConnectionOwner](bool graceful)
                        { clientConnectionOwner->NetworkConnectionBroken(graceful); }));
@@ -351,7 +351,7 @@ TEST_F(NetworkConnectionTests, NetworkConnectionTests_ReceivingMessage_Test) {
     {
         std::unique_lock<std::mutex> lock(callbackMutex);
         clients.push_back(newConnection);
-        ASSERT_TRUE(newConnection->Process(
+        ASSERT_TRUE(newConnection->DoWork(
             [&serverConnectionOwner](const std::vector<uint8_t>& message)
             { serverConnectionOwner.NetworkConnectionMessageReceived(message); },
             [&serverConnectionOwner](bool graceful)
@@ -365,7 +365,7 @@ TEST_F(NetworkConnectionTests, NetworkConnectionTests_ReceivingMessage_Test) {
     ASSERT_TRUE(client.Connect(0x7F000001, server.GetBoundPort()));
     auto clientConnectionOwner = clientOwner;
     ASSERT_TRUE(
-        client.Process([clientConnectionOwner](const std::vector<uint8_t>& message)
+        client.DoWork([clientConnectionOwner](const std::vector<uint8_t>& message)
                        { clientConnectionOwner->NetworkConnectionMessageReceived(message); },
                        [clientConnectionOwner](bool graceful)
                        { clientConnectionOwner->NetworkConnectionBroken(graceful); }));
@@ -393,7 +393,7 @@ TEST_F(NetworkConnectionTests, NetworkConnectionTests_CloseConnection_Test) {
     {
         std::unique_lock<std::mutex> lock(mutexCallBack);
         clients.push_back(newConnection);
-        ASSERT_TRUE(newConnection->Process(
+        ASSERT_TRUE(newConnection->DoWork(
             [&ownerConnectionServer](const std::vector<uint8_t>& message)
             { ownerConnectionServer.NetworkConnectionMessageReceived(message); },
             [&ownerConnectionServer](bool graceful)
@@ -407,7 +407,7 @@ TEST_F(NetworkConnectionTests, NetworkConnectionTests_CloseConnection_Test) {
     ASSERT_TRUE(client.Connect(0x7F000001, server.GetBoundPort()));
     auto clientConnectionOwner = clientOwner;
     ASSERT_TRUE(
-        client.Process([clientConnectionOwner](const std::vector<uint8_t>& message)
+        client.DoWork([clientConnectionOwner](const std::vector<uint8_t>& message)
                        { clientConnectionOwner->NetworkConnectionMessageReceived(message); },
                        [clientConnectionOwner](bool graceful)
                        { clientConnectionOwner->NetworkConnectionBroken(graceful); }));
@@ -436,7 +436,7 @@ TEST_F(NetworkConnectionTests, NetworkConnectionTests_CloseDuringBrokingConnecti
     {
         std::unique_lock<std::mutex> lock(mutexCallBack);
         clients.push_back(newConnection);
-        ASSERT_TRUE(newConnection->Process(
+        ASSERT_TRUE(newConnection->DoWork(
             [&ownerConnectionServer](const std::vector<uint8_t>& message)
             { ownerConnectionServer.NetworkConnectionMessageReceived(message); },
             [&ownerConnectionServer](bool graceful)
@@ -451,7 +451,7 @@ TEST_F(NetworkConnectionTests, NetworkConnectionTests_CloseDuringBrokingConnecti
     ASSERT_TRUE(client.Connect(0x7F000001, server.GetBoundPort()));
     auto clientConnectionOwner = clientOwner;
     ASSERT_TRUE(
-        client.Process([clientConnectionOwner](const std::vector<uint8_t>& message)
+        client.DoWork([clientConnectionOwner](const std::vector<uint8_t>& message)
                        { clientConnectionOwner->NetworkConnectionMessageReceived(message); },
                        [clientConnectionOwner](bool graceful)
                        { clientConnectionOwner->NetworkConnectionBroken(graceful); }));

@@ -56,7 +56,7 @@ namespace SystemUtils
     NetworkEndPoint::Impl::Impl() : platform(new Platform()), diagnosticsSender("NetworkEndPoint") {
         WSADATA wsaData;
         if (!WSAStartup(MAKEWORD(2, 0), &wsaData))
-        { platform->wsaStarted = true; }
+        { platform->wasStarted = true; }
     }
 
     NetworkEndPoint::Impl::~Impl() {
@@ -65,7 +65,7 @@ namespace SystemUtils
         { (void)CloseHandle(platform->socketEvent); }
         if (platform->processorStateChangeevent != NULL)
         { (void)CloseHandle(platform->processorStateChangeevent); }
-        if (platform->wsaStarted)
+        if (platform->wasStarted)
         { (void)WSACleanup(); }
     }
 
@@ -176,7 +176,7 @@ namespace SystemUtils
             {
                 diagnosticsSender.SendDiagnosticInformationFormatted(
                     SystemUtils::DiagnosticsSender::Levels::ERROR,
-                    "error creating processor state change event (%d)", (int)GetLastError());
+                    "error creating worker state change event (%d)", (int)GetLastError());
                 Close(false);
                 return false;
             }
@@ -226,11 +226,11 @@ namespace SystemUtils
         }
         diagnosticsSender.SendDiagnosticInformationFormatted(0, "endpoint opened for port %" PRIu16,
                                                              port);
-        platform->processor = std::move(std::thread(&NetworkEndPoint::Impl::Processor, this));
+        platform->worker = std::move(std::thread(&NetworkEndPoint::Impl::Work, this));
         return true;
     }
 
-    void NetworkEndPoint::Impl::Processor() {
+    void NetworkEndPoint::Impl::Work() {
         const HANDLE handles[2] = {platform->processorStateChangeevent, platform->socketEvent};
         std::vector<uint8_t> buffer;
         std::unique_lock<std::recursive_mutex> processingLock(platform->processingMutex);
@@ -355,11 +355,11 @@ namespace SystemUtils
     }
 
     void NetworkEndPoint::Impl::Close(bool stopProcessing) {
-        if (stopProcessing && platform->processor.joinable())
+        if (stopProcessing && platform->worker.joinable())
         {
             platform->processorStop = true;
             (void)SetEvent(platform->processorStateChangeevent);
-            platform->processor.join();
+            platform->worker.join();
             platform->outputQueue.clear();
         }
         if (platform->socket != INVALID_SOCKET)
@@ -373,10 +373,10 @@ namespace SystemUtils
 
     std::vector<uint32_t> NetworkEndPoint::Impl::GetInterfaceAddresses() {
         // Start up winSock library.
-        bool wsaStarted = false;
+        bool wasStarted = false;
         WSADATA wsaData;
         if (!WSAStartup(MAKEWORD(2, 0), &wsaData))
-        { wsaStarted = true; }
+        { wasStarted = true; }
 
         // Get address of all networ adapters.
         //
@@ -410,7 +410,7 @@ namespace SystemUtils
             }
         }
 
-        if (wsaStarted)
+        if (wasStarted)
         { (void)WSACleanup(); }
 
         return addresses;
