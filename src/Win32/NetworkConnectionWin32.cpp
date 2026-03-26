@@ -280,7 +280,7 @@ namespace SystemUtils
                 {
                     diagnosticsSender.SendDiagnosticInformationString(
                         0, "worker closing connection immediately");
-                    CloseImmediately();
+                    Close();
                     if (brokenDelegate != nullptr)
                     {
                         processingLock.unlock();
@@ -323,15 +323,15 @@ namespace SystemUtils
             } else
             {
                 // Close immediately
-                CloseImmediately();
+                Close();
                 return (brokenDelegate != nullptr);
             }
         }
         return false;
     }
 
-    void NetworkConnection::Impl::CloseImmediately() {
-        platform->CloseImmediately();
+    void NetworkConnection::Impl::Close() {
+        platform->Close();
         diagnosticsSender.SendDiagnosticInformationString(1, "closed connection");
     }
 
