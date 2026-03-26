@@ -23,6 +23,10 @@
 #include <errno.h>
 #include <string.h>
 
+#ifndef MSG_NOSIGNAL
+#define MSG_NOSIGNAL 0
+#endif /* MSG_NOSIGNAL */
+
 namespace {
     static const size_t MAXIMUM_READ_SIZE = 65536;
     static const size_t MAXIMUM_WRITE_SIZE = 65536;
