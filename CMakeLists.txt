@@ -97,6 +97,10 @@ target_link_libraries(${this} PUBLIC
     StringUtils
 )
 
+if(UNIX)
+    target_link_libraries(${this} PUBLIC pthread dl)
+endif()
+
 
 target_include_directories(${this} PUBLIC include)
 if(WIN32)
