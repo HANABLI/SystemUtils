@@ -200,8 +200,7 @@ namespace SystemUtils
                     }
                 } else if (receivedData > 0)
                 {
-                    diagnosticsSender.SendDiagnosticInformationString(0,
-                                                                      "worker read something");
+                    diagnosticsSender.SendDiagnosticInformationString(0, "worker read something");
                     wait = false;
                     buffer.resize((size_t)receivedData);
                     processingLock.unlock();
@@ -245,8 +244,7 @@ namespace SystemUtils
                     }
                 } else if (dataSent > 0)
                 {
-                    diagnosticsSender.SendDiagnosticInformationString(0,
-                                                                      "worker wrote something ");
+                    diagnosticsSender.SendDiagnosticInformationString(0, "worker wrote something ");
                     (void)platform->outputQueue.Drop(dataSent);
                     if ((dataSent == writeSize) && (platform->outputQueue.GetBytesQueued() > 0))
                     {
@@ -280,7 +278,7 @@ namespace SystemUtils
                 {
                     diagnosticsSender.SendDiagnosticInformationString(
                         0, "worker closing connection immediately");
-                    Close();
+                    CloseImmediately();
                     if (brokenDelegate != nullptr)
                     {
                         processingLock.unlock();
@@ -323,14 +321,14 @@ namespace SystemUtils
             } else
             {
                 // Close immediately
-                Close();
+                CloseImmediately();
                 return (brokenDelegate != nullptr);
             }
         }
         return false;
     }
 
-    void NetworkConnection::Impl::Close() {
+    void NetworkConnection::Impl::CloseImmediately() {
         platform->Close();
         diagnosticsSender.SendDiagnosticInformationString(1, "closed connection");
     }
