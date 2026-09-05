@@ -35,7 +35,10 @@
 #    undef min
 #    undef max
 #else
+#    include <netinet/ip.h>
 #    include <sys/socket.h>
+#    define IPV4_ADDRESS_IN_SOCKADDR sin_addr.s_addr
+#    define SOCKADDR_LENGTH_TYPE socklen_t
 #endif /* _WIN32 or POSIX */
 
 namespace
@@ -232,10 +235,10 @@ TEST_F(NetworkEndPointTests, NetworkEndpointTests_DatagramSending_Test) {
     struct sockaddr_in receiverAddress;
     (void)memset(&receiverAddress, 0, sizeof(receiverAddress));
     receiverAddress.sin_family = AF_INET;
-    receiverAddress.sin_addr.S_un.S_addr = 0;
+    receiverAddress.IPV4_ADDRESS_IN_SOCKADDR = 0;
     receiverAddress.sin_port = 0;
     ASSERT_TRUE(bind(receiver, (struct sockaddr*)&receiverAddress, sizeof(receiverAddress)) == 0);
-    int receiverAddressLength = sizeof(receiverAddress);
+    SOCKADDR_LENGTH_TYPE receiverAddressLength = sizeof(receiverAddress);
     uint16_t port;
     ASSERT_TRUE(getsockname(receiver, (struct sockaddr*)&receiverAddress, &receiverAddressLength) ==
                 0);
@@ -256,14 +259,14 @@ TEST_F(NetworkEndPointTests, NetworkEndpointTests_DatagramSending_Test) {
 
     // Verify that we received the datagram.
     struct sockaddr_in senderAddress;
-    int senderAddressSize = sizeof(senderAddress);
+    SOCKADDR_LENGTH_TYPE senderAddressSize = sizeof(senderAddress);
     std::vector<uint8_t> buffer(testPacket.size() * 2);
     const int amountReceived = recvfrom(receiver, (char*)buffer.data(), (int)buffer.size(), 0,
                                         (struct sockaddr*)&senderAddress, &senderAddressSize);
     ASSERT_EQ(testPacket.size(), amountReceived);
     buffer.resize(amountReceived);
     ASSERT_EQ(testPacket, buffer);
-    ASSERT_EQ(0x7F000001, ntohl(senderAddress.sin_addr.S_un.S_addr));
+    ASSERT_EQ(0x7F000001, ntohl(senderAddress.IPV4_ADDRESS_IN_SOCKADDR));
     ASSERT_EQ(endPoint.GetBoundPort(), ntohs(senderAddress.sin_port));
 }
 
@@ -278,10 +281,10 @@ TEST_F(NetworkEndPointTests, NetworkEndPointTests_DatagramReceiving_Test) {
     struct sockaddr_in senderAddress;
     (void)memset(&senderAddress, 0, sizeof(senderAddress));
     senderAddress.sin_family = AF_INET;
-    senderAddress.sin_addr.S_un.S_addr = 0;
+    senderAddress.IPV4_ADDRESS_IN_SOCKADDR = 0;
     senderAddress.sin_port = 0;
     ASSERT_TRUE(bind(sender, (struct sockaddr*)&senderAddress, sizeof(senderAddress)) == 0);
-    int senderAddressLength = sizeof(senderAddress);
+    SOCKADDR_LENGTH_TYPE senderAddressLength = sizeof(senderAddress);
     uint16_t port;
     ASSERT_TRUE(getsockname(sender, (struct sockaddr*)&senderAddress, &senderAddressLength) == 0);
     port = ntohs(senderAddress.sin_port);
@@ -300,7 +303,7 @@ TEST_F(NetworkEndPointTests, NetworkEndPointTests_DatagramReceiving_Test) {
     struct sockaddr_in receiverAddress;
     (void)memset(&receiverAddress, 0, sizeof(receiverAddress));
     receiverAddress.sin_family = AF_INET;
-    receiverAddress.sin_addr.S_un.S_addr = htonl(0x7F000001);
+    receiverAddress.IPV4_ADDRESS_IN_SOCKADDR = htonl(0x7F000001);
     receiverAddress.sin_port = htons(endPoint.GetBoundPort());
     (void)sendto(sender, (const char*)testPacket.data(), (int)testPacket.size(), 0,
                  (const sockaddr*)&receiverAddress, sizeof(receiverAddress));
@@ -323,10 +326,10 @@ TEST_F(NetworkEndPointTests, NetworkEndPointTests_ConnectionSending_Test) {
     struct sockaddr_in receiverAddress;
     (void)memset(&receiverAddress, 0, sizeof(receiverAddress));
     receiverAddress.sin_family = AF_INET;
-    receiverAddress.sin_addr.S_un.S_addr = 0;
+    receiverAddress.IPV4_ADDRESS_IN_SOCKADDR = 0;
     receiverAddress.sin_port = 0;
     ASSERT_TRUE(bind(receiver, (struct sockaddr*)&receiverAddress, sizeof(receiverAddress)) == 0);
-    int receiverAddressLength = sizeof(receiverAddress);
+    SOCKADDR_LENGTH_TYPE receiverAddressLength = sizeof(receiverAddress);
     uint16_t port;
     ASSERT_TRUE(getsockname(receiver, (struct sockaddr*)&receiverAddress, &receiverAddressLength) ==
                 0);
@@ -345,7 +348,7 @@ TEST_F(NetworkEndPointTests, NetworkEndPointTests_ConnectionSending_Test) {
     struct sockaddr_in senderAddress;
     (void)memset(&senderAddress, 0, sizeof(senderAddress));
     senderAddress.sin_family = AF_INET;
-    senderAddress.sin_addr.S_un.S_addr = htonl(0x7F000001);
+    senderAddress.IPV4_ADDRESS_IN_SOCKADDR = htonl(0x7F000001);
     senderAddress.sin_port = htons(endPoint.GetBoundPort());
     ASSERT_TRUE(connect(receiver, (const sockaddr*)&senderAddress, sizeof(senderAddress)) == 0);
 
@@ -381,10 +384,10 @@ TEST_F(NetworkEndPointTests, NetworkEndPointTests_ConnectionReceiving_Test) {
     struct sockaddr_in senderAddress;
     (void)memset(&senderAddress, 0, sizeof(senderAddress));
     senderAddress.sin_family = AF_INET;
-    senderAddress.sin_addr.S_un.S_addr = 0;
+    senderAddress.IPV4_ADDRESS_IN_SOCKADDR = 0;
     senderAddress.sin_port = 0;
     ASSERT_TRUE(bind(sender, (struct sockaddr*)&senderAddress, sizeof(senderAddress)) == 0);
-    int senderAddressLength = sizeof(senderAddress);
+    SOCKADDR_LENGTH_TYPE senderAddressLength = sizeof(senderAddress);
     uint16_t port;
     ASSERT_TRUE(getsockname(sender, (struct sockaddr*)&senderAddress, &senderAddressLength) == 0);
     port = ntohs(senderAddress.sin_port);
@@ -402,7 +405,7 @@ TEST_F(NetworkEndPointTests, NetworkEndPointTests_ConnectionReceiving_Test) {
     struct sockaddr_in receiverAddress;
     (void)memset(&receiverAddress, 0, sizeof(receiverAddress));
     receiverAddress.sin_family = AF_INET;
-    receiverAddress.sin_addr.S_un.S_addr = htonl(0x7F000001);
+    receiverAddress.IPV4_ADDRESS_IN_SOCKADDR = htonl(0x7F000001);
     receiverAddress.sin_port = htons(endPoint.GetBoundPort());
     ASSERT_TRUE(connect(sender, (const sockaddr*)&receiverAddress, sizeof(receiverAddress)) == 0);
 
