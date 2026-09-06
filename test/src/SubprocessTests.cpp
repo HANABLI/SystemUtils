@@ -182,6 +182,8 @@ TEST_F(SubprocessTests, SubprocessTests_Exit__Test) {
     const auto reportedPid = child.StartChild(
         SystemUtils::File::GetExeParentDirectory() + "/MockSubprocessBin", {"Hello, World", "exit"},
         [&owner] { owner.SubprocessChildExited(); }, [&owner] { owner.SubprocessChildCrashed(); });
+    ASSERT_NE(0, reportedPid);
+    ASSERT_TRUE(AwaitTestAreaChanged());
     ASSERT_TRUE(owner.AwaitExited());
     ASSERT_FALSE(owner.crashed);
 }
@@ -192,6 +194,8 @@ TEST_F(SubprocessTests, SubprocessTests_Crash_Test) {
     const auto reportedPid = child.StartChild(
         SystemUtils::File::GetExeParentDirectory() + "/MockSubprocessBin", {"Hello, World", "crash"},
         [&owner] { owner.SubprocessChildExited(); }, [&owner] { owner.SubprocessChildCrashed(); });
-    ASSERT_TRUE(owner.AwaitCrashed());
-    ASSERT_FALSE(owner.exited);
+    ASSERT_NE(0, reportedPid);
+    ASSERT_TRUE(AwaitTestAreaChanged());
+    EXPECT_TRUE(owner.AwaitCrashed());
+    EXPECT_FALSE(owner.exited);
 }
