@@ -16,6 +16,7 @@
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <string.h>
 #include <sys/param.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -55,6 +56,9 @@ namespace SystemUtils
         { return; }
         Close();
     }
+
+    File::File(File&& other) noexcept = default;
+    File& File::operator=(File&& other) noexcept = default;
 
     File::File(std::string path) : impl_(std::make_unique<Impl>()) { impl_->path = path; }
 
@@ -210,7 +214,7 @@ namespace SystemUtils
                 if (entryBack == NULL)
                 { break; }
                 std::string name(entry.d_name);
-                if (name == "." || name == "..")
+                if ((name == ".") || (name == ".."))
                 { continue; }
                 std::string filePath(directoryWithSeparator);
                 filePath += entry.d_name;
@@ -236,6 +240,10 @@ namespace SystemUtils
         if ((existingDirectoryWithSeparator.length() > 0) &&
             (existingDirectoryWithSeparator[existingDirectoryWithSeparator.length() - 1] != '/'))
         { existingDirectoryWithSeparator += '/'; }
+        std::string newDirectoryWithSeparator(newDirectory);
+        if ((newDirectoryWithSeparator.length() > 0) && (newDirectoryWithSeparator[newDirectoryWithSeparator.length() - 1] != '/')) {
+            newDirectoryWithSeparator += '/';
+        }
         if (!Impl::CreatePath(newDirectory))
         { return false; }
         DIR* dir = opendir(existingDirectory.c_str());
@@ -255,7 +263,7 @@ namespace SystemUtils
                 { continue; }
                 std::string filePath(existingDirectoryWithSeparator);
                 filePath += entry.d_name;
-                std::string newFilePath(newDirectory);
+                std::string newFilePath(newDirectoryWithSeparator);
                 newFilePath += entry.d_name;
                 if (entry.d_type == DT_DIR)
                 {
@@ -311,6 +319,7 @@ namespace SystemUtils
 
     bool File::SetSize(uint64_t size) {
         const bool result = (ftruncate(impl_->platform_->handle, (off_t)size));
+        return result;
     }
 
     uint64_t File::GetPosition() const {
