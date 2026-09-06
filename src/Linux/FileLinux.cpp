@@ -3,6 +3,7 @@
 #include <StringUtils/StringUtils.hpp>
 #include <vector>
 #include <string>
+#include <cstring>
 #include <dirent.h>
 #include <errno.h>
 #include <pwd.h>
