@@ -3,9 +3,9 @@
 # © 2024 by Hatem Nabli
 
 cmake_minimum_required(VERSION 3.20)
-set(this MockSubprocess)
+set(this MockSubprocessBin)
 
-set(Sources 
+set(Sources
     src/main.cpp
 )
 

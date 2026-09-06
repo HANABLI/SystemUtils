@@ -39,7 +39,7 @@ add_custom_command(TARGET ${this} POST_BUILD
 
 add_subdirectory(MockSubprocess)
 add_custom_command(TARGET ${this} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:MockSubprocess> $<TARGET_FILE_DIR:${this}>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:MockSubprocessBin> $<TARGET_FILE_DIR:${this}>
 )
 
 add_test(
