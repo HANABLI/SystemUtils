@@ -35,15 +35,15 @@ namespace
 namespace SystemUtils
 {
     NetworkConnection::Impl::~Impl() {
-        if (platform->processor.joinable())
+        if (platform->worker.joinable())
         {
-            if (std::this_thread::get_id() == platform->processor.get_id())
+            if (std::this_thread::get_id() == platform->worker.get_id())
             {
-                platform->processor.detach();
+                platform->worker.detach();
             } else
-            { platform->processor.join(); }
+            { platform->worker.join(); }
         }
-        if (platform->wsaStarted)
+        if (platform->wasStarted)
         { (void)WSACleanup(); }
         if (platform->socketEvent != NULL)
         { (void)CloseHandle(platform->socketEvent); }
@@ -55,11 +55,11 @@ namespace SystemUtils
         platform(new NetworkConnection::Platform()), diagnosticsSender("NetworkConnection") {
         WSADATA wsaData;
         if (!WSAStartup(MAKEWORD(2, 0), &wsaData))
-        { platform->wsaStarted = true; }
+        { platform->wasStarted = true; }
     }
 
     bool NetworkConnection::Impl::Connect() {
-        if (Close(CloseProcedure::ImmediateAndStopProcessor))
+        if (Close(CloseProcedure::ImmediateAndStopWorker))
         { brokenDelegate(false); }
         struct sockaddr_in socketAddress;
         (void)memset(&socketAddress, 0, sizeof(socketAddress));
@@ -82,7 +82,7 @@ namespace SystemUtils
             diagnosticsSender.SendDiagnosticInformationFormatted(
                 SystemUtils::DiagnosticsSender::Levels::ERROR, "error in bind (%d)",
                 WSAGetLastError());
-            (void)Close(CloseProcedure::ImmediateDoNotStopProcessor);
+            (void)Close(CloseProcedure::ImmediateDoNotStopWorker);
             return false;
         };
         (void)memset(&socketAddress, 0, sizeof(socketAddress));
@@ -94,7 +94,7 @@ namespace SystemUtils
             diagnosticsSender.SendDiagnosticInformationFormatted(
                 SystemUtils::DiagnosticsSender::Levels::ERROR, "error in connect (%d)",
                 WSAGetLastError());
-            (void)Close(CloseProcedure::ImmediateDoNotStopProcessor);
+            (void)Close(CloseProcedure::ImmediateDoNotStopWorker);
             return false;
         }
         int socketAddressLength = sizeof(socketAddress);
@@ -107,14 +107,14 @@ namespace SystemUtils
         return true;
     }
 
-    bool NetworkConnection::Impl::Process() {
+    bool NetworkConnection::Impl::DoWork() {
         if (platform->socket == INVALID_SOCKET)
         {
             diagnosticsSender.SendDiagnosticInformationString(
                 SystemUtils::DiagnosticsSender::Levels::ERROR, "not connected");
             return false;
         }
-        if (platform->processor.joinable())
+        if (platform->worker.joinable())
         {
             diagnosticsSender.SendDiagnosticInformationString(
                 SystemUtils::DiagnosticsSender::Levels::WARNING, "already connected");
@@ -128,7 +128,7 @@ namespace SystemUtils
             {
                 diagnosticsSender.SendDiagnosticInformationFormatted(
                     SystemUtils::DiagnosticsSender::Levels::ERROR,
-                    "error creating processor stat change event (%d)", (int)GetLastError());
+                    "error creating worker stat change event (%d)", (int)GetLastError());
                 return false;
             }
         }
@@ -152,11 +152,11 @@ namespace SystemUtils
             return false;
         }
         const auto self = shared_from_this();
-        platform->processor = std::thread([self] { self->Processor(); });
+        platform->worker = std::thread([self] { self->Work(); });
         return true;
     }
 
-    void NetworkConnection::Impl::Processor() {
+    void NetworkConnection::Impl::Work() {
         const HANDLE handles[2] = {platform->processorStateChangeevent, platform->socketEvent};
         std::vector<uint8_t> buffer;
         std::unique_lock<std::recursive_mutex> processingLock(platform->processingMutex);
@@ -165,19 +165,19 @@ namespace SystemUtils
         {
             if (wait)
             {
-                diagnosticsSender.SendDiagnosticInformationString(0, "processor going to sleep");
+                diagnosticsSender.SendDiagnosticInformationString(0, "worker going to sleep");
                 processingLock.unlock();
                 (void)WaitForMultipleObjects(2, handles, FALSE, INFINITE);
                 processingLock.lock();
             }
-            diagnosticsSender.SendDiagnosticInformationString(0, "processor woke up");
+            diagnosticsSender.SendDiagnosticInformationString(0, "worker woke up");
             if (platform->peerClosed)
             {
                 wait = true;
             } else
             {
                 buffer.resize(MAXIMUM_READ_SIZE);
-                diagnosticsSender.SendDiagnosticInformationString(0, "processor trying to read");
+                diagnosticsSender.SendDiagnosticInformationString(0, "worker trying to read");
                 const int receivedData =
                     recv(platform->socket, (char*)&buffer[0], (int)buffer.size(), 0);
                 if (receivedData == SOCKET_ERROR)
@@ -190,7 +190,7 @@ namespace SystemUtils
                     {
                         diagnosticsSender.SendDiagnosticInformationString(
                             1, "connection closed abruptly by the peer");
-                        if (Close(CloseProcedure::ImmediateDoNotStopProcessor))
+                        if (Close(CloseProcedure::ImmediateDoNotStopWorker))
                         {
                             processingLock.unlock();
                             brokenDelegate(false);
@@ -200,8 +200,7 @@ namespace SystemUtils
                     }
                 } else if (receivedData > 0)
                 {
-                    diagnosticsSender.SendDiagnosticInformationString(0,
-                                                                      "processor read something");
+                    diagnosticsSender.SendDiagnosticInformationString(0, "worker read something");
                     wait = false;
                     buffer.resize((size_t)receivedData);
                     processingLock.unlock();
@@ -222,7 +221,7 @@ namespace SystemUtils
             const auto outputQueueLength = platform->outputQueue.GetBytesQueued();
             if (outputQueueLength > 0)
             {
-                diagnosticsSender.SendDiagnosticInformationString(0, "processor trying to write");
+                diagnosticsSender.SendDiagnosticInformationString(0, "worker trying to write");
                 const auto writeSize = (int)std::min(outputQueueLength, MAXIMUM_WRITE_SIZE);
                 buffer = platform->outputQueue.Peek(writeSize);
                 const int dataSent = send(platform->socket, (const char*)&buffer[0], writeSize, 0);
@@ -233,37 +232,36 @@ namespace SystemUtils
                     {
                         diagnosticsSender.SendDiagnosticInformationString(
                             1, "connection closed abruptly by peer");
-                        if (Close(CloseProcedure::ImmediateDoNotStopProcessor))
+                        if (Close(CloseProcedure::ImmediateDoNotStopWorker))
                         {
                             processingLock.unlock();
                             brokenDelegate(false);
                             processingLock.lock();
                         }
                         diagnosticsSender.SendDiagnosticInformationString(
-                            0, "processor breaking due to send error");
+                            0, "worker breaking due to send error");
                         break;
                     }
                 } else if (dataSent > 0)
                 {
-                    diagnosticsSender.SendDiagnosticInformationString(0,
-                                                                      "processor wrote something ");
+                    diagnosticsSender.SendDiagnosticInformationString(0, "worker wrote something ");
                     (void)platform->outputQueue.Drop(dataSent);
                     if ((dataSent == writeSize) && (platform->outputQueue.GetBytesQueued() > 0))
                     {
                         diagnosticsSender.SendDiagnosticInformationString(
-                            0, "processor has more to write");
+                            0, "worker has more to write");
                         wait = false;
                     }
                 } else
                 {
-                    if (Close(CloseProcedure::ImmediateDoNotStopProcessor))
+                    if (Close(CloseProcedure::ImmediateDoNotStopWorker))
                     {
                         processingLock.unlock();
                         brokenDelegate(false);
                         processingLock.lock();
                     }
                     diagnosticsSender.SendDiagnosticInformationString(
-                        0, "processor breaking du to send returning 0");
+                        0, "worker breaking du to send returning 0");
                     break;
                 }
             }
@@ -272,14 +270,14 @@ namespace SystemUtils
                 if (!platform->shutdownSent)
                 {
                     diagnosticsSender.SendDiagnosticInformationString(
-                        0, "processor closing and done sending");
+                        0, "worker closing and done sending");
                     shutdown(platform->socket, SD_SEND);
                     platform->shutdownSent = true;
                 }
                 if (platform->peerClosed)
                 {
                     diagnosticsSender.SendDiagnosticInformationString(
-                        0, "processor closing connection immediately");
+                        0, "worker closing connection immediately");
                     CloseImmediately();
                     if (brokenDelegate != nullptr)
                     {
@@ -291,7 +289,7 @@ namespace SystemUtils
             }
         }
         diagnosticsSender.SendDiagnosticInformationString(
-            0, "processor returning due to being told to stop");
+            0, "worker returning due to being told to stop");
     }
 
     bool NetworkConnection::Impl::IsConnected() const {
@@ -305,9 +303,9 @@ namespace SystemUtils
     }
 
     bool NetworkConnection::Impl::Close(CloseProcedure procedure) {
-        if ((procedure == CloseProcedure::ImmediateAndStopProcessor) &&
-            (std::this_thread::get_id() != platform->processor.get_id()) &&
-            platform->processor.joinable())
+        if ((procedure == CloseProcedure::ImmediateAndStopWorker) &&
+            (std::this_thread::get_id() != platform->worker.get_id()) &&
+            platform->worker.joinable())
         {
             platform->processorStop = true;
             (void)SetEvent(platform->processorStateChangeevent);
@@ -331,21 +329,21 @@ namespace SystemUtils
     }
 
     void NetworkConnection::Impl::CloseImmediately() {
-        platform->CloseImmediately();
+        platform->Close();
         diagnosticsSender.SendDiagnosticInformationString(1, "closed connection");
     }
 
     uint32_t NetworkConnection::Impl::GetAddressOfHost(const std::string& hostName) {
-        bool wsaStarted = false;
+        bool wasStarted = false;
         const std::unique_ptr<WSADATA, std::function<void(WSADATA*)>> WSAData(
             new WSADATA,
-            [&wsaStarted](WSADATA* p)
+            [&wasStarted](WSADATA* p)
             {
-                if (wsaStarted)
+                if (wasStarted)
                 { (void)WSACleanup(); }
                 delete p;
             });
-        wsaStarted = !WSAStartup(MAKEWORD(2, 0), WSAData.get());
+        wasStarted = !WSAStartup(MAKEWORD(2, 0), WSAData.get());
         struct addrinfo hints;
         (void)memset(&hints, 0, sizeof(hints));
         hints.ai_family = AF_INET;
@@ -379,7 +377,7 @@ namespace SystemUtils
         return connection;
     }
 
-    void NetworkConnection::Platform::CloseImmediately() {
+    void NetworkConnection::Platform::Close() {
         (void)closesocket(socket);
         socket = INVALID_SOCKET;
     }

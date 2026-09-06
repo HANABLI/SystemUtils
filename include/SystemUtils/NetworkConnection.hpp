@@ -55,7 +55,7 @@ namespace SystemUtils
         virtual DiagnosticsSender::UnsubscribeDelegate SubscribeToDiagnostics(
             DiagnosticsSender::DiagnosticMessageDelegate delegate, size_t minLevel = 0) override;
         virtual bool Connect(uint32_t peerAddress, uint16_t peerPort) override;
-        virtual bool Process(MessageReceivedDelegate messageReceivedDelegate,
+        virtual bool DoWork(MessageReceivedDelegate messageReceivedDelegate,
                              BrokenDelegate brokenDelegate) override;
         virtual uint32_t GetPeerAddress() const override;
         virtual uint16_t GetPeerPort() const override;

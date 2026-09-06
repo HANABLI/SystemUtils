@@ -27,11 +27,11 @@ namespace SystemUtils
         return impl_->Connect();
     }
 
-    bool NetworkConnection::Process(MessageReceivedDelegate messageProcessDelegate,
+    bool NetworkConnection::DoWork(MessageReceivedDelegate messageProcessDelegate,
                                     BrokenDelegate brokenDelegate) {
         impl_->messageReceivedDelegate = messageProcessDelegate;
         impl_->brokenDelegate = brokenDelegate;
-        return impl_->Process();
+        return impl_->DoWork();
     }
 
     uint32_t NetworkConnection::GetPeerAddress() const { return impl_->peerAddress; }
@@ -50,7 +50,7 @@ namespace SystemUtils
 
     void NetworkConnection::Close(bool clean) {
         if (impl_->Close(clean ? Impl::CloseProcedure::Graceful
-                               : Impl::CloseProcedure::ImmediateAndStopProcessor))
+                               : Impl::CloseProcedure::ImmediateAndStopWorker))
         { impl_->brokenDelegate(clean); }
     }
 

@@ -97,7 +97,7 @@ namespace SystemUtils
          * of the object. It support sending and receiving of messages,
          * using the underlying operating system network handle.
          */
-        void Processor();
+        void Work();
 
         /**
          * This method is used when the network endpoint is configured

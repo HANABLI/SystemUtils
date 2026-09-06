@@ -61,6 +61,31 @@ if(WIN32)
         -DUNICODE -D_UNICODE
         -D_CRT_SOURCE_NO_WARNINGS
     )
+elseif(LINUX)
+    list(APPEND Sources
+        src/Linux/DynamicLibraryImpl.cpp
+        src/Linux/SubprocessLinux.cpp
+        src/Linux/DirectoryMonitor.cpp
+        src/Linux/FileLinux.cpp
+        src/Linux/TimeLinux.cpp
+    )
+endif()
+
+if(UNIX)
+    list(APPEND Sources
+        src/Posix/CryptoRandomPosix.cpp
+        src/Posix/DynamicLibraryImpl.hpp
+        src/Posix/DynamicLibraryPosix.cpp
+        src/Posix/SubprocessPosix.cpp
+        src/Posix/NetworkConnectionPosix.hpp
+        src/Posix/NetworkConnectionPosix.cpp
+        src/Posix/NetworkEndPointPosix.hpp
+        src/Posix/NetworkEndPointPosix.cpp
+        src/Posix/FilePosix.hpp
+        src/Posix/FilePosix.cpp
+        src/Posix/PipeSignal.hpp
+        src/Posix/PipeSignal.cpp
+    )
 endif()
 
 if(UNIX)
@@ -78,8 +103,12 @@ target_link_libraries(${this} PUBLIC
     StringUtils
 )
 
+if(UNIX)
+    target_link_libraries(${this} PUBLIC pthread dl)
+endif()
+
 
 target_include_directories(${this} PUBLIC include)
-if(WIN32)
-  add_subdirectory(test)
-endif()
+
+add_subdirectory(test)
+

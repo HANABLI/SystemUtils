@@ -147,7 +147,7 @@ namespace SystemUtils
          * @return
          *      Returns the directory containing the user' saved Game file.
          */
-        static std::string GetUserSavedGameDirectory(const std::string& nameKey);
+        static std::string GetUserSavedProjectDirectory(const std::string& nameKey);
 
         /**
          * This method lists the contents of a directory.

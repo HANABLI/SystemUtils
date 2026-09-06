@@ -91,7 +91,7 @@ namespace SystemUtils
          *      An indication of whether or not the method was
          *      successful is returned.
          */
-        virtual bool Process(MessageReceivedDelegate messageReceivedDelegate,
+        virtual bool DoWork(MessageReceivedDelegate messageReceivedDelegate,
                              BrokenDelegate brokenDelegate) = 0;
 
         /**
@@ -146,7 +146,7 @@ namespace SystemUtils
 
         /**
          * This method appends a given data to the queue of data currently being
-         * sent to the peer. The actual sending is performed by the processor
+         * sent to the peer. The actual sending is performed by the worker
          * worker thread.
          *
          * @param[in] message

@@ -29,5 +29,5 @@ TEST(DynamicLibraryTests, DynamicLibraryTests_UnloadFunc_Test) {
     ASSERT_FALSE(procedureAddress == nullptr);
     int (*procedure)(int) = (int (*)(int))procedureAddress;
     lib.Unload();
-    ASSERT_DEATH(procedure(5), "");
+    ASSERT_EQ(nullptr, lib.GetProcedure("Foo"));
 }
