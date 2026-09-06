@@ -103,6 +103,6 @@ endif()
 
 
 target_include_directories(${this} PUBLIC include)
-if(WIN32)
-  add_subdirectory(test)
-endif()
+
+add_subdirectory(test)
+
