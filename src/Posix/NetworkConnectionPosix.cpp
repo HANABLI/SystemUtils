@@ -297,7 +297,7 @@ namespace SystemUtils {
     }
 
     void NetworkConnection::Impl::CloseImmediately() {
-        platform->Close();
+        platform->CloseImmediately();
         diagnosticsSender.SendDiagnosticInformationString(
             1,
             "connection was closed"
@@ -342,7 +342,7 @@ namespace SystemUtils {
         return connection;
     }
 
-    void NetworkConnection::Platform::Close() {
+    void NetworkConnection::Platform::CloseImmediately() {
         (void)close(networkSock);
         networkSock = -1;
     }

@@ -101,7 +101,7 @@ namespace SystemUtils {
          * This method helper should be called to standardize what the class does when
          * it wants to close the connection.
          */
-        void Close();
+        void CloseImmediately();
 
     };
 }
