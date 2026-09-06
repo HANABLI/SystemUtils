@@ -148,7 +148,7 @@ TEST_F(SubprocessTests, SubprocessTests_StartSubprocess_Test) {
     Owner owner;
     SystemUtils::Subprocess child;
     const auto reportedPid = child.StartChild(
-        SystemUtils::File::GetExeParentDirectory() + "/MockSubprocess", {"Hello, World", "exit"},
+        SystemUtils::File::GetExeParentDirectory() + "/MockSubprocessBin", {"Hello, World", "exit"},
         [&owner] { owner.SubprocessChildExited(); }, [&owner] { owner.SubprocessChildCrashed(); });
     ASSERT_NE(0, reportedPid);
     ASSERT_TRUE(AwaitTestAreaChanged());
@@ -168,7 +168,7 @@ TEST_F(SubprocessTests, StartSubprocessWithFileExtension_Test) {
     Owner owner;
     SystemUtils::Subprocess child;
     const auto reportedPid = child.StartChild(
-        SystemUtils::File::GetExeParentDirectory() + "/MockSubprocess.exe",
+        SystemUtils::File::GetExeParentDirectory() + "/MockSubprocessBin.exe",
         {"Hello, World", "exit"}, [&owner] { owner.SubprocessChildExited(); },
         [&owner] { owner.SubprocessChildCrashed(); });
     ASSERT_NE(0, reportedPid);
@@ -180,7 +180,7 @@ TEST_F(SubprocessTests, SubprocessTests_Exit__Test) {
     SystemUtils::Subprocess child;
     Owner owner;
     const auto reportedPid = child.StartChild(
-        SystemUtils::File::GetExeParentDirectory() + "/MockSubprocess", {"Hello, World", "exit"},
+        SystemUtils::File::GetExeParentDirectory() + "/MockSubprocessBin", {"Hello, World", "exit"},
         [&owner] { owner.SubprocessChildExited(); }, [&owner] { owner.SubprocessChildCrashed(); });
     ASSERT_TRUE(owner.AwaitExited());
     ASSERT_FALSE(owner.crashed);
@@ -190,7 +190,7 @@ TEST_F(SubprocessTests, SubprocessTests_Crash_Test) {
     SystemUtils::Subprocess child;
     Owner owner;
     const auto reportedPid = child.StartChild(
-        SystemUtils::File::GetExeParentDirectory() + "/MockSubprocess", {"Hello, World", "crash"},
+        SystemUtils::File::GetExeParentDirectory() + "/MockSubprocessBin", {"Hello, World", "crash"},
         [&owner] { owner.SubprocessChildExited(); }, [&owner] { owner.SubprocessChildCrashed(); });
     ASSERT_TRUE(owner.AwaitCrashed());
     ASSERT_FALSE(owner.exited);
