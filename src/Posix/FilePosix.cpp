@@ -91,7 +91,7 @@ namespace SystemUtils
         Close();
         impl_->platform_->writeAccess = true;
         impl_->platform_->handle =
-            open(impl_->path.c_str(), O_RDWR | O_CREAT | S_IRUSR | S_IWUSR | S_IXUSR);
+            open(impl_->path.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR | S_IXUSR);
         auto isSuccessful = (impl_->platform_->handle >= 0);
         if (!isSuccessful)
         {
