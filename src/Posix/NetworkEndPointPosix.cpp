@@ -151,7 +151,7 @@ namespace SystemUtils {
             }
         } else {
             int flags = fcntl(platform->networkSocket, F_GETFL, 0);
-            flags != O_NONBLOCK;
+            flags |= O_NONBLOCK;
             (void)fcntl(platform->networkSocket, F_SETFL, flags);
         }
         diagnosticsSender.SendDiagnosticInformationFormatted(
