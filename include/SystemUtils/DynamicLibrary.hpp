@@ -21,7 +21,7 @@ namespace SystemUtils
     {
         // Lifecycle managment
     public:
-        ~DynamicLibrary();
+        ~DynamicLibrary() noexcept;
         DynamicLibrary(const DynamicLibrary&) = delete;
         DynamicLibrary(DynamicLibrary&& other) noexcept;
         DynamicLibrary& operator=(const DynamicLibrary& other) = delete;

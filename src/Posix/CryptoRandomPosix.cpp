@@ -24,7 +24,7 @@ namespace SystemUtils
         int rn;
     };
 
-    CryptoRandom::~CryptoRandom() = default;
+    CryptoRandom::~CryptoRandom() noexcept = default;
 
     CryptoRandom::CryptoRandom() : impl_(std::make_unique<Impl>()) {
         impl_->rn = open("/dev/urandom", O_RDONLY);
