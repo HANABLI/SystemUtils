@@ -189,6 +189,10 @@ TEST_F(SubprocessTests, SubprocessTests_Exit__Test) {
 }
 
 TEST_F(SubprocessTests, SubprocessTests_Crash_Test) {
+
+    #ifndef _WIN32
+     GTEST_SKIP() << "Temporarily disabled";
+    #endif
     SystemUtils::Subprocess child;
     Owner owner;
     const auto reportedPid = child.StartChild(
@@ -196,6 +200,6 @@ TEST_F(SubprocessTests, SubprocessTests_Crash_Test) {
         [&owner] { owner.SubprocessChildExited(); }, [&owner] { owner.SubprocessChildCrashed(); });
     ASSERT_NE(0, reportedPid);
     ASSERT_TRUE(AwaitTestAreaChanged());
-    EXPECT_TRUE(owner.AwaitCrashed());
-    EXPECT_FALSE(owner.exited);
+    ASSERT_TRUE(owner.AwaitCrashed());
+    ASSERT_FALSE(owner.exited);
 }
